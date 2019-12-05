@@ -72,11 +72,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       y1: 0,
       y2: 0,
       colorStops: [{
-        offset: 0, color: '#cec396', opacity: 0// 0% 处的颜色
+        offset: 0, color: '#cec396', opacity: 0.1// 0% 处的颜色
       }, {
         offset: 0.5, color: '#cec396', opacity: 0.4// 50% 处的颜色
       }, {
-        offset: 1, color: '#cec396', opacity: 0 // 100% 处的颜色
+        offset: 1, color: '#cec396', opacity: 0.1 // 100% 处的颜色
       }],
     },
     active: {
@@ -86,20 +86,24 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       y1: 0,
       y2: 0,
       colorStops: [{
-        offset: 0, color: '#f0302e', opacity: 0// 0% 处的颜色
+        offset: 0, color: '#f0302e', opacity: 0.1// 0% 处的颜色
       }, {
         offset: 0.5, color: '#f0302e', opacity: 0.4// 50% 处的颜色
       }, {
-        offset: 1, color: '#f0302e', opacity: 0 // 100% 处的颜色
+        offset: 1, color: '#f0302e', opacity: 0.1 // 100% 处的颜色
       }],
     }
   };
 
-  private scale = 950;
+  @Input() public scale = 1000;
+
+  private barDegree = 1 / 1000;
 
   private center = [0, 0];
 
   private transition: any;
+
+  private showMarker = true;
 
   constructor(
     private d3GeoService: D3GeoService
@@ -107,6 +111,9 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   public ngOnInit() {
     this.transition = d3.transition().duration(1000);
+    this.barSize.w = this.scale * this.barDegree * 10;
+    this.barSize.h = this.scale * this.barDegree * 5;
+    this.barSize.x = this.scale * this.barDegree * 5;
   }
 
   public ngAfterViewInit() {
@@ -143,8 +150,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       const barGNodes = this.initGNodes(chinaMapData, 'china-map-bar'); // 新建nodes防止重叠
       this.drawMapBar(barGNodes, projection);
 
-      const markGNodes = this.initGNodes(chinaMapData, 'china-map-marker'); // 新建nodes防止重叠
-      this.drawMapMarker(markGNodes, projection);
+      if (this.showMarker) {
+        const markGNodes = this.initGNodes(chinaMapData, 'china-map-marker'); // 新建nodes防止重叠
+        this.drawMapMarker(markGNodes, projection);
+      }
+
     });
   }
 
@@ -223,6 +233,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .style('fill', '#e7d9a499');
 
     gNodes.append('circle')
+      .attr('class', 'cp-icon')
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
         return `translate(${axis[0]},${axis[1]})`;
@@ -242,7 +253,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   private activeMarker(node: any, isActive = true) {
     node.selectAll('.text-wrap').attr('fill', isActive ? 'url(#china_marker_color_active)' : 'url(#china_marker_color)'); // arrow-icon
     node.selectAll('.arrow-icon').attr('fill', isActive ? '#f0302e' : '#aedcff');
-    node.selectAll('.marker-text').attr('fill', isActive ? '#f0302e' : '#cec396');
+    node.selectAll('.frame-g').style('display', isActive ? 'block' : 'none');
+  }
+
+  private activeCpIcon(node: any, isActive = true) {
+    node.attr('fill', isActive ? '#f0302e' : '#cec396');
   }
 
   private drawMapBar(gNodes: any, projection: any) {
@@ -264,11 +279,17 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const allMarkNode = d3.selectAll('.markG');
         this.activeMarker(allMarkNode, false);
 
+        const allCpIcons = d3.selectAll('.cp-icon');
+        this.activeCpIcon(allCpIcons, false);
+
         const curNode = d3.select(allBarNodes.nodes()[index]);
         this.activeBar(curNode, true);
 
         const curMarkNode = d3.select(allMarkNode.nodes()[index]);
         this.activeMarker(curMarkNode, true);
+
+        const curIconNode = d3.select(allCpIcons.nodes()[index]);
+        this.activeCpIcon(curIconNode, true);
       })
       .on('mouseout', (d: any, index: number) => {
         const allBarNodes = d3.selectAll('.barG');
@@ -276,6 +297,9 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
         const allMarkNode = d3.selectAll('.markG');
         this.activeMarker(allMarkNode, false);
+
+        const allCpIcons = d3.selectAll('.cp-icon');
+        this.activeCpIcon(allCpIcons, false);
       });
 
 
@@ -325,10 +349,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private drawMapMarker(gNodes: any, projection: any) {
-    const z = this.barSize.h;
-    const x = this.barSize.x;
-    const y = 50; // 柱子高度
-    const w = this.barSize.w;
     const markG = gNodes.append('g')
       .attr('class', 'markG')
       .attr('transform', (d: any) => {
@@ -359,10 +379,57 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('d', (d: any) => {
         const c = 0;
         const dh = 12 + 3;
-        return `M${c},${dh} L${c + 4},${dh}L${c},${dh + 8}, L${c - 4},${dh} Z`;
+        return `M${c},${dh} L${c + 4},${dh} L${c},${dh + 8}, L${c - 4},${dh} Z`;
       })
       .attr('fill', '#aedcff')
       .attr('transform', `translate(5,0)`);
+
+    const frameGNode = markG.append('g')
+      .attr('class', 'frame-g')
+      .style('display', 'none');
+
+    const frameDh = 14;
+    const frameW = 6;
+
+    frameGNode.append('path')
+      .attr('class', 'marker-frame-left-top')
+      .attr('d', (d: any) => {
+        const c = -this.getTextWidth(d.value.toFixed(2)) / 2;
+        const dh = -frameDh;
+        return `M${c + frameW},${dh} L${c},${dh}`;
+      })
+      .attr('stroke', '#f0302e')
+      .attr('stroke-width', 2);
+
+    frameGNode.append('path')
+      .attr('class', 'marker-frame-right-top')
+      .attr('d', (d: any) => {
+        const c = this.getTextWidth(d.value.toFixed(2)) / 2 + frameW;
+        const dh = -frameDh;
+        return `M${c},${dh} L${c + frameW},${dh}`;
+      })
+      .attr('stroke', '#f0302e')
+      .attr('stroke-width', 2);
+
+    frameGNode.append('path')
+      .attr('class', 'marker-frame-left-bottom')
+      .attr('d', (d: any) => {
+        const c = -this.getTextWidth(d.value.toFixed(2)) / 2;
+        const dh = frameDh - 1;
+        return `M${c + frameW},${dh} L${c},${dh}`;
+      })
+      .attr('stroke', '#f0302e')
+      .attr('stroke-width', 2);
+
+    frameGNode.append('path')
+      .attr('class', 'marker-frame-right-bottom')
+      .attr('d', (d: any) => {
+        const c = this.getTextWidth(d.value.toFixed(2)) / 2 + frameW;
+        const dh = frameDh - 1;
+        return `M${c},${dh} L${c + frameW},${dh}`;
+      })
+      .attr('stroke', '#f0302e')
+      .attr('stroke-width', 2);
 
     markG.transition(this.transition)
       .attr('transform', (d: any) => {
