@@ -33,11 +33,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       y1: 0,
       y2: 1,
       colorStops: [{
-        offset: 0, color: '#aedcff', opacity: 0.8 // 0% 处的颜色
+        offset: 0, color: '#aedcff', opacity: 0.9 // 0% 处的颜色
       }, {
-        offset: 0.04, color: '#aedcff', opacity: 0.76
+        offset: 0.25, color: '#aedcff', opacity: 0.86
       }, {
-        offset: 0.52, color: '#aedcff', opacity: 0.36
+        offset: 0.5, color: '#aedcff', opacity: 0.66
       }, {
         offset: 0.85, color: '#aedcff', opacity: 0.1
       }, {
@@ -51,11 +51,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       y1: 0,
       y2: 1,
       colorStops: [{
-        offset: 0, color: '#f0302e', opacity: 0.8 // 0% 处的颜色
+        offset: 0, color: '#f0302e', opacity: 0.9 // 0% 处的颜色
       }, {
-        offset: 0.04, color: '#f0302e', opacity: 0.76
+        offset: 0.25, color: '#f0302e', opacity: 0.86
       }, {
-        offset: 0.52, color: '#f0302e', opacity: 0.36
+        offset: 0.5, color: '#f0302e', opacity: 0.66
       }, {
         offset: 0.85, color: '#f0302e', opacity: 0.1
       }, {
@@ -63,6 +63,45 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       }],
     }
   };
+
+  @Input() public barColorRight: any = {
+    normal: { // #aedcff #f0302e
+      type: 'linear',
+      x1: 0,
+      x2: 0,
+      y1: 0,
+      y2: 1,
+      colorStops: [{
+        offset: 0, color: '#aedcff', opacity: 0.7 // 0% 处的颜色
+      }, {
+        offset: 0.25, color: '#aedcff', opacity: 0.66
+      }, {
+        offset: 0.5, color: '#aedcff', opacity: 0.46
+      }, {
+        offset: 0.85, color: '#aedcff', opacity: 0.1
+      }, {
+        offset: 1, color: '#aedcff', opacity: 0
+      }],
+    },
+    active: {
+      type: 'linear',
+      x1: 0,
+      x2: 0,
+      y1: 0,
+      y2: 1,
+      colorStops: [{
+        offset: 0, color: '#f0302e', opacity: 0.7 // 0% 处的颜色
+      }, {
+        offset: 0.25, color: '#f0302e', opacity: 0.66
+      }, {
+        offset: 0.5, color: '#f0302e', opacity: 0.46
+      }, {
+        offset: 0.85, color: '#f0302e', opacity: 0.1
+      }, {
+        offset: 1, color: '#f0302e', opacity: 0
+      }],
+    }
+  }
 
   @Input() public markColor: any = {
     normal: {
@@ -72,11 +111,13 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       y1: 0,
       y2: 0,
       colorStops: [{
-        offset: 0, color: '#cec396', opacity: 0.1// 0% 处的颜色
+        offset: 0, color: '#cec396', opacity: 0// 0% 处的颜色
       }, {
-        offset: 0.5, color: '#cec396', opacity: 0.4// 50% 处的颜色
+        offset: 0.3, color: '#cec396', opacity: 0.4// 50% 处的颜色
       }, {
-        offset: 1, color: '#cec396', opacity: 0.1 // 100% 处的颜色
+        offset: 0.7, color: '#cec396', opacity: 0.4// 50% 处的颜色
+      }, {
+        offset: 1, color: '#cec396', opacity: 0 // 100% 处的颜色
       }],
     },
     active: {
@@ -86,11 +127,13 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       y1: 0,
       y2: 0,
       colorStops: [{
-        offset: 0, color: '#f0302e', opacity: 0.1// 0% 处的颜色
+        offset: 0, color: '#f0302e', opacity: 0// 0% 处的颜色
       }, {
-        offset: 0.5, color: '#f0302e', opacity: 0.4// 50% 处的颜色
+        offset: 0.3, color: '#f0302e', opacity: 0.4// 30% 处的颜色
       }, {
-        offset: 1, color: '#f0302e', opacity: 0.1 // 100% 处的颜色
+        offset: 0.7, color: '#f0302e', opacity: 0.4// 40% 处的颜色
+      }, {
+        offset: 1, color: '#f0302e', opacity: 0 // 100% 处的颜色
       }],
     }
   };
@@ -219,7 +262,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('class', 'batman-path')
       .attr('d', d3.geoPath(projection))
       .attr('fill', 'none')
-      .attr('stroke', '#9fc8e7')
+      .attr('stroke', '#e7d9a41a')
       .attr('stroke-width', '2');
 
     gNodes.append('text')
@@ -230,7 +273,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       })
       .attr('text-anchor', 'end')
       .attr('dominant-baseline', 'middle')
-      .style('fill', '#e7d9a499');
+      .style('fill', '#e7d9a466');
 
     gNodes.append('circle')
       .attr('class', 'cp-icon')
@@ -250,9 +293,9 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     const nodes = d3.selectAll('.barG');
     const curNode = d3.select(nodes.nodes()[index]);
     const node = isActive ? curNode : nodes;
-    node.selectAll('.rightSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
+    node.selectAll('.rightSauare').attr('fill', isActive ? 'url(#china_bar_right_active)' : 'url(#china_bar_right)');
     node.selectAll('.frontSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
-    node.selectAll('.topSauare').attr('fill', isActive ? '#f0302e' : '#aedcff');
+    node.selectAll('.topSauare').attr('fill', isActive ? '#f0302eb3' : '#aedcffb3');
   }
 
   private activeMarker(index: number, isActive = true) {
@@ -261,7 +304,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     const node = isActive ? curNode : nodes;
     node.selectAll('.text-wrap').attr('fill', isActive ? 'url(#china_marker_color_active)' : 'url(#china_marker_color)'); // arrow-icon
     node.selectAll('.arrow-icon').attr('fill', isActive ? '#f0302e' : '#aedcff');
-    node.selectAll('.frame-g').style('display', isActive ? 'block' : 'none');
+    node.selectAll('.marker-frame').attr('stroke', isActive ? '#f0302e' : '#aedcff');
   }
 
   private activeCpIcon(index: number, isActive = true) {
@@ -308,7 +351,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = d.value;
         return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
       })
-      .attr('fill', 'url(#china_bar_front)')
+      .attr('fill', 'url(#china_bar_right)')
       .attr('stroke-width', 0);
 
 
@@ -339,7 +382,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = d.value;
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
       })
-      .attr('fill', `#aedcff`).attr('stroke-width', 0);
+      .attr('fill', `#aedcffb3`).attr('stroke-width', 0);
   }
 
   private drawMapMarker(gNodes: any, projection: any) {
@@ -353,11 +396,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     markG.append('rect')
       .attr('class', 'text-wrap')
       .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
-      .attr('width', (d: any) => this.getTextWidth(d.value.toFixed(2)))
+      .attr('width', (d: any) => this.getTextWidth(d.value.toFixed(2)) + 10)
       .attr('height', '24')
       .attr('fill', 'url(#china_marker_color)')
       .attr('y', '-13')
-      .attr('transform', `translate(5,0)`);
+      // .attr('transform', `translate(5,0)`);
 
 
     markG.append('text')
@@ -380,49 +423,49 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
     const frameGNode = markG.append('g')
       .attr('class', 'frame-g')
-      .style('display', 'none');
+      // .style('display', 'none');
 
     const frameDh = 14;
     const frameW = 6;
 
     frameGNode.append('path')
-      .attr('class', 'marker-frame-left-top')
+      .attr('class', 'marker-frame marker-frame-left-top')
       .attr('d', (d: any) => {
         const c = -this.getTextWidth(d.value.toFixed(2)) / 2;
         const dh = -frameDh;
         return `M${c + frameW},${dh} L${c},${dh}`;
       })
-      .attr('stroke', '#f0302e')
+      .attr('stroke', '#aedcff')
       .attr('stroke-width', 2);
 
     frameGNode.append('path')
-      .attr('class', 'marker-frame-right-top')
+      .attr('class', 'marker-frame marker-frame-right-top')
       .attr('d', (d: any) => {
         const c = this.getTextWidth(d.value.toFixed(2)) / 2 + frameW;
         const dh = -frameDh;
         return `M${c},${dh} L${c + frameW},${dh}`;
       })
-      .attr('stroke', '#f0302e')
+      .attr('stroke', '#aedcff')
       .attr('stroke-width', 2);
 
     frameGNode.append('path')
-      .attr('class', 'marker-frame-left-bottom')
+      .attr('class', 'marker-frame marker-frame-left-bottom')
       .attr('d', (d: any) => {
         const c = -this.getTextWidth(d.value.toFixed(2)) / 2;
         const dh = frameDh - 1;
         return `M${c + frameW},${dh} L${c},${dh}`;
       })
-      .attr('stroke', '#f0302e')
+      .attr('stroke', '#aedcff')
       .attr('stroke-width', 2);
 
     frameGNode.append('path')
-      .attr('class', 'marker-frame-right-bottom')
+      .attr('class', 'marker-frame marker-frame-right-bottom')
       .attr('d', (d: any) => {
         const c = this.getTextWidth(d.value.toFixed(2)) / 2 + frameW;
         const dh = frameDh - 1;
         return `M${c},${dh} L${c + frameW},${dh}`;
       })
-      .attr('stroke', '#f0302e')
+      .attr('stroke', '#aedcff')
       .attr('stroke-width', 2);
 
     markG.transition(this.transition)
@@ -434,8 +477,10 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private createGradient() {
     this.createLinearGradient('china_bar_front', this.barColor.normal);
+    this.createLinearGradient('china_bar_right', this.barColorRight.normal);
     this.createLinearGradient('china_marker_color', this.markColor.normal);
     this.createLinearGradient('china_bar_front_active', this.barColor.active);
+    this.createLinearGradient('china_bar_right_active', this.barColorRight.active);
     this.createLinearGradient('china_marker_color_active', this.markColor.active);
   }
 
