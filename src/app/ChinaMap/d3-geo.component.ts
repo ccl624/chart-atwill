@@ -95,7 +95,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     }
   };
 
-  private scale = 850;
+  private scale = 900;
 
   private center = [0, 0];
 
@@ -106,8 +106,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   ) { }
 
   public ngOnInit() {
-    this.transition = d3.transition()
-      .duration(1000);
+    this.transition = d3.transition().duration(1000);
   }
 
   public ngAfterViewInit() {
@@ -217,7 +216,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .text((d: any) => d.properties.name)
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 5},${axis[1]}) scale(0.8)`;
+        return `translate(${axis[0] - 8},${axis[1]}) scale(0.8)`;
       })
       .attr('text-anchor', 'end')
       .attr('dominant-baseline', 'middle')
@@ -241,7 +240,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private activeMarker(node: any, isActive = true) {
-    node.selectAll('.text-wrap').attr('fill', isActive ? 'url(#china_marker_color_active)' : 'url(#china_marker_color)');
+    node.selectAll('.text-wrap').attr('fill', isActive ? 'url(#china_marker_color_active)' : 'url(#china_marker_color)'); // arrow-icon
+    node.selectAll('.arrow-icon').attr('fill', isActive ? '#f0302e' : '#aedcff');
     node.selectAll('.marker-text').attr('fill', isActive ? '#f0302e' : '#cec396');
   }
 
@@ -333,30 +333,41 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('class', 'markG')
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 1.5},${axis[1] - 0 - 15})`;
+        return `translate(${axis[0] - 3},${axis[1] - 0 - 30}) scale(0.8, 1.5)`;
       });
 
     markG.append('rect')
       .attr('class', 'text-wrap')
       .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
       .attr('width', (d: any) => this.getTextWidth(d.value.toFixed(2)))
-      .attr('height', '16')
+      .attr('height', '24')
       .attr('fill', 'url(#china_marker_color)')
-      .attr('y', '-9');
+      .attr('y', '-13')
+      .attr('transform', `translate(5,0)`);
 
 
     markG.append('text')
       .attr('class', 'marker-text')
-      .text((d: any) => d.value.toFixed(2))
-      .attr('transform', 'scale(0.8)')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
-      .attr('fill', '#cec396');
+      .attr('fill', '#cec396')
+      .text((d: any) => d.value.toFixed(2))
+      .attr('transform', `translate(5,0)`);
+
+    markG.append('path')
+      .attr('class', 'arrow-icon')
+      .attr('d', (d: any) => {
+        const c = 0;
+        const dh = 12 + 3;
+        return `M${c},${dh} L${c + 4},${dh}L${c},${dh + 8}, L${c - 4},${dh} Z`;
+      })
+      .attr('fill', '#aedcff')
+      .attr('transform', `translate(5,0)`);
 
     markG.transition(this.transition)
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 1.5},${axis[1] - d.value - 15})`;
+        return `translate(${axis[0] - 3},${axis[1] - d.value - 30}) scale(0.8, 1)`;
       });
   }
 
@@ -395,7 +406,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private getTextWidth(str: string) {
     const span = d3.select('body').append('span').style('display', 'inline-block').text(str);
-    const spanWidth = Number.parseInt(span.style('width'), 10) + 5;
+    const spanWidth = Number.parseInt(span.style('width'), 10) + 10;
     span.remove();
     return spanWidth;
   }
