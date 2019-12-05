@@ -216,7 +216,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       })
       .attr('text-anchor', 'end')
       .attr('dominant-baseline', 'middle')
-      .style('fill', '#46525e');
+      .style('fill', '#b6af8f');
 
     gNodes.append('circle')
       .attr('transform', (d: any) => {
@@ -250,7 +250,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
         return `translate(${axis[0] - x - 1.5},${axis[1] - d.value})`;
-      }).attr('cursor', 'pointer')
+      })
+      .attr('cursor', 'pointer')
       .on('mouseenter', (d: any, index: number) => {
         const allBarNodes = d3.selectAll('.barG');
         this.activeBar(allBarNodes, false);
