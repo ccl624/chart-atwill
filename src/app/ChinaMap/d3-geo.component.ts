@@ -209,7 +209,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     gNodes.append('path')
       .attr('class', 'batman-path')
       .attr('d', d3.geoPath(projection))
-      .attr('fill', '#1e375d')
+      .attr('fill', 'none')
       .attr('stroke', '#9fc8e7')
       .attr('stroke-width', '2');
 
