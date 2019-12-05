@@ -249,7 +249,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('class', 'barG')
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - x - 1.5},${axis[1] - d.value})`;
+        return `translate(${axis[0] - x - 1.5},${axis[1]})`;
       })
       .attr('cursor', 'pointer')
       .on('mouseenter', (d: any, index: number) => {
@@ -270,28 +270,49 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     barG.append('path')
       .attr('class', 'rightSauare')
       .attr('d', (d: any) => {
+        const height = 0;
+        return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
+      })
+      .transition()
+      .duration(1000)
+      .attr('d', (d: any) => {
         const height = d.value;
-        return `M${w},0 L${w},${height} L${x + w},${height - z} L${x + w},${-z} L${w},${0} Z `;
+        return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
       })
       .attr('fill', 'url(#china_bar_front)')
-      .attr('stroke-width', 1);
+      .attr('stroke-width', 0);
 
 
 
     barG.append('path')
       .attr('class', 'frontSauare')
       .attr('d', (d: any) => {
+        const height = 0;
+        return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
+      })
+      .transition()
+      .duration(1000)
+      .attr('d', (d: any) => {
         const height = d.value;
-        return `M0,0 L0,${height} L${w},${height} L${w},${0} Z`;
-      }).attr('fill', 'url(#china_bar_front)')
-      .attr('stroke-width', 1);
+        return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
+      })
+      .attr('fill', 'url(#china_bar_front)')
+      .attr('stroke-width', 0);
 
 
     barG.append('path')
       .attr('class', 'topSauare')
       .attr('d', (d: any) => {
-        return `M0,0 L${w},0 L${x + w},${-z} L${x},${-z} Z`;
-      }).attr('fill', `#aedcff`).attr('stroke-width', 0);
+        const height = 0;
+        return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
+      })
+      .transition()
+      .duration(1000)
+      .attr('d', (d: any) => {
+        const height = d.value;
+        return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
+      })
+      .attr('fill', `#aedcff`).attr('stroke-width', 0);
   }
 
   private drawMapMarker(gNodes: any, projection: any) {
@@ -303,7 +324,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('class', 'markG')
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 1.5},${axis[1] - d.value - 15}) scale(1,1.5)`;
+        return `translate(${axis[0] - 1.5},${axis[1] - d.value - 15})`;
       });
 
     markG.append('rect')
