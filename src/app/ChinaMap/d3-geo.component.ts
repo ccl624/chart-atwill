@@ -95,7 +95,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     }
   };
 
-  private scale = 900;
+  private scale = 950;
 
   private center = [0, 0];
 
@@ -220,7 +220,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       })
       .attr('text-anchor', 'end')
       .attr('dominant-baseline', 'middle')
-      .style('fill', '#b6af8f');
+      .style('fill', '#e7d9a499');
 
     gNodes.append('circle')
       .attr('transform', (d: any) => {
