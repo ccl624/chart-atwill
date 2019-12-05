@@ -257,7 +257,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `translate(${axis[0] - x - 1.5},${axis[1]})`;
       })
       .attr('cursor', 'pointer')
-      .on('mouseenter', (d: any, index: number) => {
+      .on('mouseover', (d: any, index: number) => {
         const allBarNodes = d3.selectAll('.barG');
         this.activeBar(allBarNodes, false);
 
@@ -269,6 +269,13 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
         const curMarkNode = d3.select(allMarkNode.nodes()[index]);
         this.activeMarker(curMarkNode, true);
+      })
+      .on('mouseout', (d: any, index: number) => {
+        const allBarNodes = d3.selectAll('.barG');
+        this.activeBar(allBarNodes, false);
+
+        const allMarkNode = d3.selectAll('.markG');
+        this.activeMarker(allMarkNode, false);
       });
 
 
