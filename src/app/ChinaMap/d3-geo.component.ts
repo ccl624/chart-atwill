@@ -244,20 +244,37 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('fill', '#e3d49d');
   }
 
-  private activeBar(node: any, isActive = true) {
+  private activeBar(index: number, isActive = true) {
+    const parentNodes = d3.selectAll('.china-map-bar');
+    const parentCurNode = d3.select(parentNodes.nodes()[index]);
+    const nodes = d3.selectAll('.barG');
+    const curNode = d3.select(nodes.nodes()[index]);
+    const node = isActive ? curNode : nodes;
     node.selectAll('.rightSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
     node.selectAll('.frontSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
     node.selectAll('.topSauare').attr('fill', isActive ? '#f0302e' : '#aedcff');
   }
 
-  private activeMarker(node: any, isActive = true) {
+  private activeMarker(index: number, isActive = true) {
+    const nodes = d3.selectAll('.markG');
+    const curNode = d3.select(nodes.nodes()[index]);
+    const node = isActive ? curNode : nodes;
     node.selectAll('.text-wrap').attr('fill', isActive ? 'url(#china_marker_color_active)' : 'url(#china_marker_color)'); // arrow-icon
     node.selectAll('.arrow-icon').attr('fill', isActive ? '#f0302e' : '#aedcff');
     node.selectAll('.frame-g').style('display', isActive ? 'block' : 'none');
   }
 
-  private activeCpIcon(node: any, isActive = true) {
+  private activeCpIcon(index: number, isActive = true) {
+    const nodes = d3.selectAll('.cp-icon');
+    const curNode = d3.select(nodes.nodes()[index]);
+    const node = isActive ? curNode : nodes;
     node.attr('fill', isActive ? '#f0302e' : '#cec396');
+  }
+
+  private activeNodes(index: number, active: boolean) {
+    this.activeBar(index, active);
+    this.activeMarker(index, active);
+    this.activeCpIcon(index, active);
   }
 
   private drawMapBar(gNodes: any, projection: any) {
@@ -273,33 +290,10 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       })
       .attr('cursor', 'pointer')
       .on('mouseover', (d: any, index: number) => {
-        const allBarNodes = d3.selectAll('.barG');
-        this.activeBar(allBarNodes, false);
-
-        const allMarkNode = d3.selectAll('.markG');
-        this.activeMarker(allMarkNode, false);
-
-        const allCpIcons = d3.selectAll('.cp-icon');
-        this.activeCpIcon(allCpIcons, false);
-
-        const curNode = d3.select(allBarNodes.nodes()[index]);
-        this.activeBar(curNode, true);
-
-        const curMarkNode = d3.select(allMarkNode.nodes()[index]);
-        this.activeMarker(curMarkNode, true);
-
-        const curIconNode = d3.select(allCpIcons.nodes()[index]);
-        this.activeCpIcon(curIconNode, true);
+        this.activeNodes(index, true);
       })
       .on('mouseout', (d: any, index: number) => {
-        const allBarNodes = d3.selectAll('.barG');
-        this.activeBar(allBarNodes, false);
-
-        const allMarkNode = d3.selectAll('.markG');
-        this.activeMarker(allMarkNode, false);
-
-        const allCpIcons = d3.selectAll('.cp-icon');
-        this.activeCpIcon(allCpIcons, false);
+        this.activeNodes(index, false);
       });
 
 
