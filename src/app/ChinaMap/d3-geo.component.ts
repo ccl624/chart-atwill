@@ -333,7 +333,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('class', 'markG')
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 3},${axis[1] - 0 - 30}) scale(0.8, 1.2)`;
+        return `translate(${axis[0] - 3},${axis[1] - 0 - 40}) scale(0.8, 1)`;
       });
 
     markG.append('rect')
@@ -367,7 +367,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     markG.transition(this.transition)
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 3},${axis[1] - d.value - 30}) scale(0.8, 1.2)`;
+        return `translate(${axis[0] - 3},${axis[1] - d.value - 40}) scale(0.8, 1)`;
       });
   }
 
