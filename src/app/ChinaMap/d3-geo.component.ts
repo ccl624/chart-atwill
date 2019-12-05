@@ -277,7 +277,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
         const dx = 3;
-        return `translate(${axis[0] + dx},${axis[1] - y - 10}) scale(0.8,1)`;
+        return `translate(${axis[0] + dx},${axis[1] - y - 15}) scale(0.8,1)`;
       });
 
     markG.append('rect')
