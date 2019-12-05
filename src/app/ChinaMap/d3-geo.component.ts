@@ -222,7 +222,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const dx = 3;
         return `translate(${axis[0] - x + dx},${axis[1] - y}) scale(0.8,1)`;
       }).attr('cursor', 'pointer')
-      .on('click', (d: any, index: number) => {
+      .on('mouseenter', (d: any, index: number) => {
         const allBarNodes = d3.selectAll('.barG');
         this.activeBar(allBarNodes, false);
 
