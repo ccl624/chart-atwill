@@ -95,6 +95,10 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     }
   };
 
+  private scale = 850;
+
+  private center = [0, 0];
+
   constructor(
     private d3GeoService: D3GeoService
   ) { }
@@ -105,7 +109,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.initSvg();
     this.createGradient();
     this.createFilter('china_map_filter');
-    this.getChinaJSON();
+    this.getChinaMapData();
   }
 
   private initSvg() {
@@ -119,41 +123,65 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.defs = this.svg.append('defs');
   }
 
-  private getChinaJSON() {
-    this.d3GeoService.getChinaJSON().subscribe((res: any) => {
-      const projection = this.initProjection(res);
-      const gFilterNodes = this.initGNodes(res, 'china-map-filter');
+  private getChinaMapData() {
+    Promise.all([this.getChinaJSON(), this.getChinaMapOutLine()]).then((res: any) => {
+      const chinaMapData = res[0].features.map((feature: any, index: number) => Object.assign(feature, { value: Math.random() * 100 }));
+      const chinaMapOutlineData = res[1].features;
+      this.center = res[0].cp;
+
+      const projection = this.initProjection();
+      const gFilterNodes = this.initFilterGNodes(chinaMapOutlineData, 'china-map-filter');
       this.drawChinaFilterMap(gFilterNodes, projection);
 
-      const gNodes = this.initGNodes(res, 'china-map');
+      const gNodes = this.initGNodes(chinaMapData, 'china-map');
       this.drawChinaMap(gNodes, projection);
 
-      const barGNodes = this.initGNodes(res, 'china-map-bar'); // 新建nodes防止重叠
+      const barGNodes = this.initGNodes(chinaMapData, 'china-map-bar'); // 新建nodes防止重叠
       this.drawMapBar(barGNodes, projection);
 
-      const markGNodes = this.initGNodes(res, 'china-map-marker'); // 新建nodes防止重叠
+      const markGNodes = this.initGNodes(chinaMapData, 'china-map-marker'); // 新建nodes防止重叠
       this.drawMapMarker(markGNodes, projection);
     });
   }
 
-  private initProjection(data: any) {
-    const centers = data.features.reduce((sums: number[], feature: any) => {
-      return [sums[0] + feature.properties.cp[0], sums[1] + feature.properties.cp[1]];
-    }, [0, 0]);
+  private getChinaMapOutLine() {
+    const promise = new Promise(resolve => {
+      this.d3GeoService.getChinaMapOutlineJSON().subscribe((res: any) => {
+        resolve(res);
+      });
+    });
+    return promise;
+  }
 
-    const featureLength = data.features.length;
-    const center0 = centers[0] / featureLength;
-    const center1 = centers[1] / featureLength;
+  private initFilterGNodes(data: any, id: string) {
+    const gNodes = this.svg.selectAll(id)
+      .data(data)
+      .enter()
+      .append('g')
+      .attr('class', id);
 
+    return gNodes;
+  }
+
+  private getChinaJSON() {
+    const promise = new Promise(resolve => {
+      this.d3GeoService.getChinaJSON().subscribe((res: any) => {
+        resolve(res);
+      });
+    });
+    return promise;
+  }
+
+  private initProjection() {
     return d3.geoMercator()
-      .center([center0, center1])
-      .scale(this.svgH * 0.9)
+      .center(this.center)
+      .scale(this.scale)
       .translate([this.svgW / 2, this.svgH / 2]);
   }
 
-  private initGNodes(data: any, id: string) {
+  private initGNodes(data: any[], id: string) {
     const gNodes = this.svg.selectAll(id)
-      .data(data.features)
+      .data(data)
       .enter()
       .append('g')
       .attr('class', id);
@@ -163,10 +191,10 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private drawChinaFilterMap(gNodes: any, projection: any) {
     gNodes.append('path')
-      .attr('transform', 'translate(0,30)')
+      .attr('transform', 'translate(0,15)')
       .attr('class', 'batman-path')
       .attr('d', d3.geoPath(projection))
-      .attr('fill', '#17203b')
+      .attr('fill', 'none')
       .attr('stroke', '#9fc8e7')
       .attr('stroke-width', '1')
       .attr('filter', 'url(#china_map_filter)');
@@ -182,7 +210,10 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
     gNodes.append('text')
       .text((d: any) => d.properties.name)
-      .attr('transform', (d: any) => `translate(${projection(d.properties.cp)}) scale(0.8)`)
+      .attr('transform', (d: any) => {
+        const axis = projection(d.properties.cp);
+        return `translate(${axis[0] - 5},${axis[1]}) scale(0.8)`;
+      })
       .attr('text-anchor', 'end')
       .attr('dominant-baseline', 'middle')
       .style('fill', '#46525e');
@@ -190,8 +221,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     gNodes.append('circle')
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        const dx = 4;
-        return `translate(${axis[0] + dx},${axis[1]})`;
+        return `translate(${axis[0]},${axis[1]})`;
       })
       .attr('r', 3)
       .attr('x', 0)
@@ -219,8 +249,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('class', 'barG')
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        const dx = 3;
-        return `translate(${axis[0] - x + dx},${axis[1] - y}) scale(0.8,1)`;
+        return `translate(${axis[0] - x - 1.5},${axis[1] - d.value})`;
       }).attr('cursor', 'pointer')
       .on('mouseenter', (d: any, index: number) => {
         const allBarNodes = d3.selectAll('.barG');
@@ -240,9 +269,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     barG.append('path')
       .attr('class', 'rightSauare')
       .attr('d', (d: any) => {
-        const width = w;
-        const height = y;
-        return `M${width},0 L${width},${height} L${x + width},${height - z} L${x + width},${-z} L${width},${0} Z `;
+        const height = d.value;
+        return `M${w},0 L${w},${height} L${x + w},${height - z} L${x + w},${-z} L${w},${0} Z `;
       })
       .attr('fill', 'url(#china_bar_front)')
       .attr('stroke-width', 1);
@@ -252,9 +280,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     barG.append('path')
       .attr('class', 'frontSauare')
       .attr('d', (d: any) => {
-        const width = w;
-        const height = y;
-        return `M0,0 L0,${height} L${width},${height} L${width},${0} Z`;
+        const height = d.value;
+        return `M0,0 L0,${height} L${w},${height} L${w},${0} Z`;
       }).attr('fill', 'url(#china_bar_front)')
       .attr('stroke-width', 1);
 
@@ -262,8 +289,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     barG.append('path')
       .attr('class', 'topSauare')
       .attr('d', (d: any) => {
-        const width = w;
-        return `M0,0 L${width},0 L${x + width},${-z} L${x},${-z} Z`;
+        return `M0,0 L${w},0 L${x + w},${-z} L${x},${-z} Z`;
       }).attr('fill', `#aedcff`).attr('stroke-width', 0);
   }
 
@@ -276,21 +302,20 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('class', 'markG')
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        const dx = 3;
-        return `translate(${axis[0] + dx},${axis[1] - y - 15}) scale(0.8,1)`;
+        return `translate(${axis[0] - 1.5},${axis[1] - d.value - 15}) scale(1,1.5)`;
       });
 
     markG.append('rect')
       .attr('class', 'text-wrap')
-      .attr('x', -this.getTextWidth('190,876,543') / 2)
+      .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
       .attr('y', '-9')
-      .attr('width', this.getTextWidth('190,876,543'))
+      .attr('width', (d: any) => this.getTextWidth(d.value.toFixed(2)))
       .attr('height', '16')
       .attr('fill', 'url(#china_marker_color)');
 
     markG.append('text')
       .attr('class', 'marker-text')
-      .text((d: any) => '190,876,543')
+      .text((d: any) => d.value.toFixed(2))
       .attr('transform', 'scale(0.8)')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
@@ -327,7 +352,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     filter.append('feGaussianBlur')
       .attr('result', 'blurOut')
       .attr('in', 'offOut')
-      .attr('stdDeviation', 1.5); // 阴影模糊度
+      .attr('stdDeviation', 1); // 阴影模糊度
   }
 
   private getTextWidth(str: string) {

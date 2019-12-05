@@ -12,4 +12,10 @@ export class D3GeoService {
     request.showLoading = false;
     return this.http.get('assets/json/china.json', request);
   }
+
+
+  getChinaMapOutlineJSON(request: any = { params: {} }) {
+    request.showLoading = false;
+    return this.http.get('assets/json/china_outline.json', request);
+  }
 }
