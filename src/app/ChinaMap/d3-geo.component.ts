@@ -99,11 +99,16 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private center = [0, 0];
 
+  private transition: any;
+
   constructor(
     private d3GeoService: D3GeoService
   ) { }
 
-  public ngOnInit() { }
+  public ngOnInit() {
+    this.transition = d3.transition()
+      .duration(1000);
+  }
 
   public ngAfterViewInit() {
     this.initSvg();
@@ -273,8 +278,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = 0;
         return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
       })
-      .transition()
-      .duration(1000)
+      .transition(this.transition)
       .attr('d', (d: any) => {
         const height = d.value;
         return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
@@ -290,8 +294,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = 0;
         return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
       })
-      .transition()
-      .duration(1000)
+      .transition(this.transition)
       .attr('d', (d: any) => {
         const height = d.value;
         return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
@@ -306,8 +309,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = 0;
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
       })
-      .transition()
-      .duration(1000)
+      .transition(this.transition)
       .attr('d', (d: any) => {
         const height = d.value;
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
@@ -324,16 +326,17 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('class', 'markG')
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 1.5},${axis[1] - d.value - 15})`;
+        return `translate(${axis[0] - 1.5},${axis[1] - 0 - 15})`;
       });
 
     markG.append('rect')
       .attr('class', 'text-wrap')
       .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
-      .attr('y', '-9')
       .attr('width', (d: any) => this.getTextWidth(d.value.toFixed(2)))
       .attr('height', '16')
-      .attr('fill', 'url(#china_marker_color)');
+      .attr('fill', 'url(#china_marker_color)')
+      .attr('y', '-9');
+
 
     markG.append('text')
       .attr('class', 'marker-text')
@@ -342,6 +345,12 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .attr('fill', '#cec396');
+
+    markG.transition(this.transition)
+      .attr('transform', (d: any) => {
+        const axis = projection(d.properties.cp);
+        return `translate(${axis[0] - 1.5},${axis[1] - d.value - 15})`;
+      });
   }
 
   private createGradient() {
