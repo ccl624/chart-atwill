@@ -186,16 +186,17 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       const projection = this.initProjection();
       const gFilterNodes = this.initFilterGNodes(chinaMapOutlineData, 'china-map-filter');
       this.drawChinaFilterMap(gFilterNodes, projection);
+      this.drawChinaOutLineMap(gFilterNodes, projection);
 
       const gNodes = this.initGNodes(chinaMapData, 'china-map');
       this.drawChinaMap(gNodes, projection);
 
-      const barGNodes = this.initGNodes(chinaMapData, 'china-map-bar'); // 新建nodes防止重叠
-      this.drawMapBar(barGNodes, projection);
+      // const barGNodes = this.initGNodes(chinaMapData, 'china-map-bar'); // 新建nodes防止重叠
+      this.drawMapBar(gNodes, projection);
 
       if (this.showMarker) {
-        const markGNodes = this.initGNodes(chinaMapData, 'china-map-marker'); // 新建nodes防止重叠
-        this.drawMapMarker(markGNodes, projection);
+        // const markGNodes = this.initGNodes(chinaMapData, 'china-map-marker'); // 新建nodes防止重叠
+        this.drawMapMarker(gNodes, projection);
       }
 
     });
@@ -246,26 +247,55 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     return gNodes;
   }
 
-  private drawChinaFilterMap(gNodes: any, projection: any) {
+  private drawChinaFilterMap(gNodes: any, projection: any, hasFilter = true) {
     gNodes.append('path')
-      .attr('transform', 'translate(0,15)')
+      .attr('transform', hasFilter ? 'translate(0,15)' : 'none')
       .attr('class', 'batman-path')
       .attr('d', d3.geoPath(projection))
       .attr('fill', 'none')
       .attr('stroke', '#9fc8e7')
-      .attr('stroke-width', '1')
-      .attr('filter', 'url(#china_map_filter)');
+      .attr('filter', hasFilter ? 'url(#china_map_filter)' : 'none')
+      .attr('stroke-width', '1');
+  }
+
+  private drawChinaOutLineMap(gNodes: any, projection: any) {
+    const path = gNodes.append('path')
+      .attr('class', 'outline-path')
+      .attr('d', d3.geoPath(projection))
+      .attr('fill', 'none')
+      .attr('stroke', '#9fc8e7')
+      .attr('stroke-width', 1);
+
+    const attr = {
+      name: 'stroke-width',
+      values: ['0', '1'],
+    };
+    this.bling(path, attr, '0');
+  }
+
+  private bling(node: any, attr: any, value: string) {
+    node.transition()
+      .duration(600)
+      .attr(attr.name, value)
+      .on('end', () => {
+        const nextValue = value === attr.values[0] ? attr.values[1] : attr.values[0];
+        this.bling(node, attr, nextValue);
+      });
   }
 
   private drawChinaMap(gNodes: any, projection: any) {
-    gNodes.append('path')
+
+    const mapG = gNodes.append('g')
+      .attr('class', 'mapG'); // .attr('transform', (d: any) => `translate(${projection(d.properties.cp)})`)
+
+    mapG.append('path')
       .attr('class', 'batman-path')
       .attr('d', d3.geoPath(projection))
       .attr('fill', 'none')
       .attr('stroke', '#e7d9a41a')
       .attr('stroke-width', '2');
 
-    gNodes.append('text')
+    mapG.append('text')
       .text((d: any) => d.properties.name)
       .attr('transform', (d: any) => {
         const axis = projection(d.properties.cp);
@@ -275,49 +305,36 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('dominant-baseline', 'middle')
       .style('fill', '#e7d9a466');
 
-    gNodes.append('circle')
+    mapG.append('circle')
       .attr('class', 'cp-icon')
-      .attr('transform', (d: any) => {
-        const axis = projection(d.properties.cp);
-        return `translate(${axis[0]},${axis[1]})`;
-      })
+      .attr('transform', (d: any) => `translate(${projection(d.properties.cp)})`)
       .attr('r', 3)
       .attr('x', 0)
       .attr('y', 0)
       .attr('fill', '#e3d49d');
   }
 
-  private activeBar(index: number, isActive = true) {
-    const parentNodes = d3.selectAll('.china-map-bar');
-    const parentCurNode = d3.select(parentNodes.nodes()[index]);
-    const nodes = d3.selectAll('.barG');
-    const curNode = d3.select(nodes.nodes()[index]);
-    const node = isActive ? curNode : nodes;
-    node.selectAll('.rightSauare').attr('fill', isActive ? 'url(#china_bar_right_active)' : 'url(#china_bar_right)');
+  private activeBar(node: any, isActive = true) {
+    node.selectAll('.rightSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
     node.selectAll('.frontSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
     node.selectAll('.topSauare').attr('fill', isActive ? '#f0302eb3' : '#aedcffb3');
   }
 
-  private activeMarker(index: number, isActive = true) {
-    const nodes = d3.selectAll('.markG');
-    const curNode = d3.select(nodes.nodes()[index]);
-    const node = isActive ? curNode : nodes;
-    node.selectAll('.text-wrap').attr('fill', isActive ? 'url(#china_marker_color_active)' : 'url(#china_marker_color)'); // arrow-icon
-    node.selectAll('.arrow-icon').attr('fill', isActive ? '#f0302e' : '#aedcff');
-    node.selectAll('.marker-frame').attr('stroke', isActive ? '#f0302e' : '#aedcff');
+  private activeMarker(node: any, isActive = true) {
+    node.select('.markG').selectAll('.text-wrap').attr('fill', isActive ? 'url(#china_marker_color_active)' : 'url(#china_marker_color)');
+    node.select('.markG').selectAll('.arrow-icon').attr('fill', isActive ? '#f0302e' : '#aedcff');
+    node.select('.markG').selectAll('.marker-frame').attr('stroke', isActive ? '#f0302e' : '#aedcff');
   }
 
-  private activeCpIcon(index: number, isActive = true) {
-    const nodes = d3.selectAll('.cp-icon');
-    const curNode = d3.select(nodes.nodes()[index]);
-    const node = isActive ? curNode : nodes;
-    node.attr('fill', isActive ? '#f0302e' : '#cec396');
+  private activeCpIcon(node: any, isActive = true) {
+    node.select('.cp-icon').attr('fill', isActive ? '#f0302e' : '#cec396');
   }
 
-  private activeNodes(index: number, active: boolean) {
-    this.activeBar(index, active);
-    this.activeMarker(index, active);
-    this.activeCpIcon(index, active);
+  private activeNodes(node: any, active: boolean) {
+    const parentNode = d3.select(node.node().parentNode);
+    this.activeBar(node, active);
+    this.activeMarker(parentNode, active);
+    this.activeCpIcon(parentNode, active);
   }
 
   private drawMapBar(gNodes: any, projection: any) {
@@ -325,6 +342,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     const x = this.barSize.x;
     const y = 50; // 柱子高度
     const w = this.barSize.w;
+    const that = this;
     const barG = gNodes.append('g')
       .attr('class', 'barG')
       .attr('transform', (d: any) => {
@@ -332,11 +350,17 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `translate(${axis[0] - x - 1.5},${axis[1]})`;
       })
       .attr('cursor', 'pointer')
-      .on('mouseover', (d: any, index: number) => {
-        this.activeNodes(index, true);
+      .on('mouseover', function (d: any, index: number) {
+        const node = d3.select(this);
+        that.activeNodes(node, true);
+        // const cloneNode = d3.select(this.parentNode).clone();
+        // d3.select(this.parentNode).remove();
+        // console.log(d3.select(this.parentNode).node());
+        // that.svg.append(cloneNode.node()[0]);
       })
-      .on('mouseout', (d: any, index: number) => {
-        this.activeNodes(index, false);
+      .on('mouseout', function (d: any, index: number) {
+        const node = d3.select(this);
+        that.activeNodes(node, false);
       });
 
 
@@ -396,11 +420,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     markG.append('rect')
       .attr('class', 'text-wrap')
       .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
-      .attr('width', (d: any) => this.getTextWidth(d.value.toFixed(2)) + 10)
+      .attr('width', (d: any) => this.getTextWidth(d.value.toFixed(2)))
       .attr('height', '24')
       .attr('fill', 'url(#china_marker_color)')
       .attr('y', '-13')
-      // .attr('transform', `translate(5,0)`);
+      .attr('transform', `translate(5,0)`);
 
 
     markG.append('text')
@@ -422,8 +446,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('transform', `translate(5,0)`);
 
     const frameGNode = markG.append('g')
-      .attr('class', 'frame-g')
-      // .style('display', 'none');
+      .attr('class', 'frame-g');
 
     const frameDh = 14;
     const frameW = 6;
