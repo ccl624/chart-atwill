@@ -11,7 +11,7 @@ import 'd3-geo-projection';
 
 export class D3GeoComponent implements OnInit, AfterViewInit {
 
-  private svgH = 0;
+  private svgH = 0;  //
 
   private svgW = 0;
 
@@ -148,6 +148,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private showMarker = true;
 
+  private hightestLevelG: any; // svg画布最高层占位元素 用来存放当前被选中的元素 解决重叠问题
+
   constructor(
     private d3GeoService: D3GeoService
   ) { }
@@ -184,21 +186,27 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       this.center = res[0].cp;
 
       const projection = this.initProjection();
-      const gFilterNodes = this.initFilterGNodes(chinaMapOutlineData, 'china-map-filter');
+      const gFilterNodes = this.initGNodes(chinaMapOutlineData, 'china-map-filter');
       this.drawChinaFilterMap(gFilterNodes, projection);
       this.drawChinaOutLineMap(gFilterNodes, projection);
 
       const gNodes = this.initGNodes(chinaMapData, 'china-map');
       this.drawChinaMap(gNodes, projection);
+      this.drawMapData(gNodes, projection);
 
-      // const barGNodes = this.initGNodes(chinaMapData, 'china-map-bar'); // 新建nodes防止重叠
-      this.drawMapBar(gNodes, projection);
+      const that = this;
+      this.hightestLevelG = this.svg.append('g')
+        .attr('class', 'hightest-Level-g')
+        .on('mouseout', function (d: any, index: number) {
+          const node1 = d3.select(this).select('.data-shape-g');
+          const id = node1.attr('id');
+          node1.remove();
 
-      if (this.showMarker) {
-        // const markGNodes = this.initGNodes(chinaMapData, 'china-map-marker'); // 新建nodes防止重叠
-        this.drawMapMarker(gNodes, projection);
-      }
-
+          const tarNode = d3.select('#' + id);
+          const barNode = tarNode.select('.data-shape-wrap');
+          barNode.style('display', '');
+          that.activeNodes(barNode, false);
+        });
     });
   }
 
@@ -209,16 +217,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       });
     });
     return promise;
-  }
-
-  private initFilterGNodes(data: any, id: string) {
-    const gNodes = this.svg.selectAll(id)
-      .data(data)
-      .enter()
-      .append('g')
-      .attr('class', id);
-
-    return gNodes;
   }
 
   private getChinaJSON() {
@@ -237,13 +235,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .translate([this.svgW / 2, this.svgH / 2]);
   }
 
-  private initGNodes(data: any[], id: string) {
-    const gNodes = this.svg.selectAll(id)
-      .data(data)
-      .enter()
-      .append('g')
-      .attr('class', id);
-
+  private initGNodes(data: any[], classStr: string) {
+    const gNodes = this.svg.selectAll(classStr).data(data).enter().append('g').attr('class', classStr);
     return gNodes;
   }
 
@@ -264,11 +257,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('d', d3.geoPath(projection))
       .attr('fill', 'none')
       .attr('stroke', '#9fc8e7')
-      .attr('stroke-width', 1);
+      .attr('stroke-width', 2);
 
     const attr = {
       name: 'stroke-width',
-      values: ['0', '1'],
+      values: ['0', '2'],
     };
     this.bling(path, attr, '0');
   }
@@ -284,9 +277,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private drawChinaMap(gNodes: any, projection: any) {
-
     const mapG = gNodes.append('g')
-      .attr('class', 'mapG'); // .attr('transform', (d: any) => `translate(${projection(d.properties.cp)})`)
+      .attr('class', 'mapG');
 
     mapG.append('path')
       .attr('class', 'batman-path')
@@ -294,24 +286,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('fill', 'none')
       .attr('stroke', '#e7d9a41a')
       .attr('stroke-width', '2');
-
-    mapG.append('text')
-      .text((d: any) => d.properties.name)
-      .attr('transform', (d: any) => {
-        const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 8},${axis[1]}) scale(0.8)`;
-      })
-      .attr('text-anchor', 'end')
-      .attr('dominant-baseline', 'middle')
-      .style('fill', '#e7d9a466');
-
-    mapG.append('circle')
-      .attr('class', 'cp-icon')
-      .attr('transform', (d: any) => `translate(${projection(d.properties.cp)})`)
-      .attr('r', 3)
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('fill', '#e3d49d');
   }
 
   private activeBar(node: any, isActive = true) {
@@ -337,30 +311,67 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.activeCpIcon(parentNode, active);
   }
 
-  private drawMapBar(gNodes: any, projection: any) {
+  private addMouseEvent(node: any) {
+
+  }
+
+  private drawMapData(gNodes: any, projection: any) {
+    const dataShapeG = gNodes.append('g')
+      .attr('class', 'data-shape-g')
+      .attr('id', (d: any, index: number) => 'data-shape-g' + index)
+      .attr('transform', (d: any) => `translate(${projection(d.properties.cp)})`);
+
+    const wrapG = dataShapeG.append('g')
+      .attr('class', 'data-shape-wrap');
+
+    this.drawCpName(wrapG);
+    this.drawMapBar(wrapG);
+    this.drawMapMarker(wrapG);
+  }
+
+  private drawCpName(nodes: any) {
+    const cpNmaeG = nodes.append('g')
+      .attr('class', 'cp-name data-shape-child');
+    cpNmaeG.append('text')
+      .text((d: any) => d.properties.name)
+      .attr('transform', 'translate(-8,0) scale(0.8)')
+      .attr('text-anchor', 'end')
+      .attr('dominant-baseline', 'middle')
+      .style('fill', '#e7d9a466');
+
+    cpNmaeG.append('circle')
+      .attr('class', 'cp-icon')
+      .attr('r', 3)
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('fill', '#e3d49d');
+  }
+
+  private drawMapBar(gNodes: any) {
     const z = this.barSize.h;
     const x = this.barSize.x;
-    const y = 50; // 柱子高度
     const w = this.barSize.w;
     const that = this;
+
     const barG = gNodes.append('g')
-      .attr('class', 'barG')
-      .attr('transform', (d: any) => {
-        const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - x - 1.5},${axis[1]})`;
-      })
+      .attr('class', 'barG data-shape-child')
+      .attr('transform', `translate(${- x - 1.5},0)`)
       .attr('cursor', 'pointer')
+      .on('mouseout', function () {
+        console.log(1111);
+
+        const node = d3.select(this);
+        that.activeNodes(node, false);
+      })
       .on('mouseover', function (d: any, index: number) {
         const node = d3.select(this);
         that.activeNodes(node, true);
-        // const cloneNode = d3.select(this.parentNode).clone();
+        const cloneNode = d3.select(this.parentNode.parentNode).clone(true);
+        // d3.select(this.parentNode.parentNode).remove();
+        // this.svg.append(cloneNode);
+        that.hightestLevelG.node().appendChild(cloneNode.node());
+        d3.select(this.parentNode).style('display', 'none');
         // d3.select(this.parentNode).remove();
-        // console.log(d3.select(this.parentNode).node());
-        // that.svg.append(cloneNode.node()[0]);
-      })
-      .on('mouseout', function (d: any, index: number) {
-        const node = d3.select(this);
-        that.activeNodes(node, false);
       });
 
 
@@ -376,7 +387,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
       })
       .attr('fill', 'url(#china_bar_right)')
-      .attr('stroke-width', 0);
+      .attr('stroke-width', 1)
+      .attr('stroke', 'rgba(0,0,0,0)');
 
 
 
@@ -392,7 +404,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
       })
       .attr('fill', 'url(#china_bar_front)')
-      .attr('stroke-width', 0);
+      .attr('stroke-width', 1)
+      .attr('stroke', 'rgba(0,0,0,0)');
 
 
     barG.append('path')
@@ -406,16 +419,17 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = d.value;
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
       })
-      .attr('fill', `#aedcffb3`).attr('stroke-width', 0);
+      .attr('fill', `#aedcffb3`).attr('stroke-width', 1)
+      .attr('stroke', 'rgba(0,0,0,0)');
   }
 
-  private drawMapMarker(gNodes: any, projection: any) {
+  private drawMapMarker(gNodes: any) {
+    if (!this.showMarker) {
+      return false;
+    }
     const markG = gNodes.append('g')
-      .attr('class', 'markG')
-      .attr('transform', (d: any) => {
-        const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 3},${axis[1] - 0 - 40}) scale(0.8, 1)`;
-      });
+      .attr('class', 'markG data-shape-child')
+      .attr('transform', `translate(${-3},${-40}) scale(0.8, 1)`);
 
     markG.append('rect')
       .attr('class', 'text-wrap')
@@ -425,7 +439,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('fill', 'url(#china_marker_color)')
       .attr('y', '-13')
       .attr('transform', `translate(5,0)`);
-
 
     markG.append('text')
       .attr('class', 'marker-text')
@@ -445,6 +458,13 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('fill', '#aedcff')
       .attr('transform', `translate(5,0)`);
 
+    this.drawMarkFrame(markG);
+
+    markG.transition(this.transition)
+      .attr('transform', (d: any) => `translate(${-3},${- d.value - 40}) scale(0.8, 1)`);
+  }
+
+  private drawMarkFrame(markG: any) {
     const frameGNode = markG.append('g')
       .attr('class', 'frame-g');
 
@@ -490,12 +510,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       })
       .attr('stroke', '#aedcff')
       .attr('stroke-width', 2);
-
-    markG.transition(this.transition)
-      .attr('transform', (d: any) => {
-        const axis = projection(d.properties.cp);
-        return `translate(${axis[0] - 3},${axis[1] - d.value - 40}) scale(0.8, 1)`;
-      });
   }
 
   private createGradient() {
