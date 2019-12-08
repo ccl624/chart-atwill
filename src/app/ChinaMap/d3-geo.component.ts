@@ -550,7 +550,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     }
     this.markerG = gNodes.append('g')
       .attr('class', 'markG data-shape-child')
-      .style('cursour', 'pointer')
+      .attr('cursor', 'pointer')
       .attr('transform', `translate(${-3},${-40}) scale(0.8, 1)`)
       .style('display', (d: any) => d.height ? 'block' : 'none');
 
