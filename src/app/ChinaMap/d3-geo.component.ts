@@ -446,7 +446,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     const z = this.barSize.h;
     const x = this.barSize.x;
     const w = this.barSize.w;
-    this.barG.selectAll('.rightSauare')
+    this.barG.style('display', (d: any) => (d.height ? 'block' : 'none'))
+      .selectAll('.rightSauare')
       .transition(this.transition)
       .attr('d', (d: any) => {
         const height = d.height;
@@ -469,7 +470,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private updateMarker() {
-    this.markerG.selectAll('.text-wrap')
+    this.markerG.style('display', (d: any) => (d.height ? 'block' : 'none'))
+      .selectAll('.text-wrap')
       .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
       .transition(this.transition)
       .attr('width', (d: any) => d.value ? this.getTextWidth(d.value.toFixed(2)) : 0);
