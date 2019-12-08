@@ -25,6 +25,17 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     x: 5
   };
 
+  public showData: any[] = [
+    {
+      name: '北京',
+      value: 993
+    },
+    {
+      name: '天津',
+      value: 667
+    }
+  ];
+
   @Input() public barColor: any = {
     normal: { // #aedcff #f0302e
       type: 'linear',
@@ -140,6 +151,19 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   @Input() public scale = 1000;
 
+  @Input()
+  public get data(): any[] {
+    return this.showData;
+  }
+  public set data(v: any[]) {
+    this.showData = v;
+    if (this.isLodadingMapDtaCompleted) {
+      this.updateMapData();
+    }
+  };
+
+  private isLodadingMapDtaCompleted = false;
+
   private barDegree = 1 / 1000;
 
   private center = [0, 0];
@@ -150,6 +174,12 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private hightestLevelG: any; // svg画布最高层占位元素 用来存放当前被选中的元素 解决重叠问题
 
+  private barG: any;
+
+  private markerG: any;
+
+  private dataShapeG: any;
+
   constructor(
     private d3GeoService: D3GeoService
   ) { }
@@ -159,6 +189,34 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.barSize.w = this.scale * this.barDegree * 10;
     this.barSize.h = this.scale * this.barDegree * 5;
     this.barSize.x = this.scale * this.barDegree * 5;
+
+    setInterval(() => {
+      this.showData = [
+        {
+          name: '北京',
+          value: Math.random() * 1000
+        },
+        {
+          name: '天津',
+          value: Math.random() * 1000
+        },
+        {
+          name: '新疆',
+          value: Math.random() * 1000
+        }
+        ,
+        {
+          name: '贵州',
+          value: Math.random() * 1000
+        }
+        ,
+        {
+          name: '河南',
+          value: Math.random() * 1000
+        }
+      ];
+      this.updateMapData();
+    }, 5000)
   }
 
   public ngAfterViewInit() {
@@ -181,7 +239,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private getChinaMapData() {
     Promise.all([this.getChinaJSON(), this.getChinaMapOutLine()]).then((res: any) => {
-      const chinaMapData = res[0].features.map((feature: any, index: number) => Object.assign(feature, { value: Math.random() * 100 }));
+      const chinaMapData = res[0].features;
       const chinaMapOutlineData = res[1].features;
       this.center = res[0].cp;
 
@@ -207,6 +265,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
           barNode.style('display', '');
           that.activeNodes(barNode, false);
         });
+
+      this.isLodadingMapDtaCompleted = true;
     });
   }
 
@@ -311,22 +371,36 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.activeCpIcon(parentNode, active);
   }
 
-  private addMouseEvent(node: any) {
-
-  }
-
   private drawMapData(gNodes: any, projection: any) {
-    const dataShapeG = gNodes.append('g')
+    this.dataShapeG = gNodes.append('g')
       .attr('class', 'data-shape-g')
       .attr('id', (d: any, index: number) => 'data-shape-g' + index)
-      .attr('transform', (d: any) => `translate(${projection(d.properties.cp)})`);
+      .attr('transform', (d: any) => `translate(${projection(d.properties.cp)})`)
+      .each((d: any) => {
+        const data = this.showData.find(dataItem => dataItem.name === d.properties.name);
+        const maxData = Math.max.apply(null, this.showData.map(item => item.value));
+        const value = data ? data.value : 0;
+        const height = data ? data.value / maxData * 100 : 0;
+        d = Object.assign(d, { value, height });
+      });
 
-    const wrapG = dataShapeG.append('g')
-      .attr('class', 'data-shape-wrap');
-
+    const wrapG = this.dataShapeG.append('g').attr('class', 'data-shape-wrap');
     this.drawCpName(wrapG);
+
     this.drawMapBar(wrapG);
     this.drawMapMarker(wrapG);
+  }
+
+  private updateMapData() {
+    this.dataShapeG.each((d: any) => {
+      const data = this.showData.find(dataItem => dataItem.name === d.properties.name);
+      const maxData = Math.max.apply(null, this.showData.map(item => item.value));
+      const value = data ? data.value : 0;
+      const height = data ? data.value / maxData * 100 : 0;
+      d = Object.assign(d, { value, height });
+    });
+    this.updateMapBar();
+    this.updateMarker();
   }
 
   private drawCpName(nodes: any) {
@@ -347,19 +421,56 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('fill', '#e3d49d');
   }
 
+  private updateMapBar() {
+    const z = this.barSize.h;
+    const x = this.barSize.x;
+    const w = this.barSize.w;
+    this.barG.selectAll('.rightSauare')
+      .transition(this.transition)
+      .attr('d', (d: any) => {
+        const height = d.height;
+        return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
+      })
+    this.barG.selectAll('.frontSauare')
+      .transition(this.transition)
+      .attr('d', (d: any) => {
+        const height = d.height;
+        return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
+      });
+
+    this.barG.selectAll('.topSauare')
+      .attr('fill', (d: any) => d.height ? '#aedcffb3' : 'none')
+      .transition(this.transition)
+      .attr('d', (d: any) => {
+        const height = d.height;
+        return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
+      });
+  }
+
+  private updateMarker() {
+    this.markerG.selectAll('.text-wrap')
+      .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
+      .transition(this.transition)
+      .attr('width', (d: any) => d.value ? this.getTextWidth(d.value.toFixed(2)) : 0);
+
+    this.markerG.selectAll('.marker-text').text((d: any) => d.value ? d.value.toFixed(2) : '');
+    this.markerG.selectAll('.arrow-icon').attr('fill', (d: any) => d.value ? '#aedcff' : 'none');
+    this.markerG.selectAll('.marker-frame').attr('stroke-width', (d: any) => d.value ? 2 : 0);
+    this.markerG.transition(this.transition)
+      .attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
+  }
+
   private drawMapBar(gNodes: any) {
     const z = this.barSize.h;
     const x = this.barSize.x;
     const w = this.barSize.w;
     const that = this;
 
-    const barG = gNodes.append('g')
+    this.barG = gNodes.append('g')
       .attr('class', 'barG data-shape-child')
       .attr('transform', `translate(${- x - 1.5},0)`)
       .attr('cursor', 'pointer')
       .on('mouseout', function () {
-        console.log(1111);
-
         const node = d3.select(this);
         that.activeNodes(node, false);
       })
@@ -367,15 +478,12 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const node = d3.select(this);
         that.activeNodes(node, true);
         const cloneNode = d3.select(this.parentNode.parentNode).clone(true);
-        // d3.select(this.parentNode.parentNode).remove();
-        // this.svg.append(cloneNode);
         that.hightestLevelG.node().appendChild(cloneNode.node());
         d3.select(this.parentNode).style('display', 'none');
-        // d3.select(this.parentNode).remove();
       });
 
 
-    barG.append('path')
+    this.barG.append('path')
       .attr('class', 'rightSauare')
       .attr('d', (d: any) => {
         const height = 0;
@@ -383,7 +491,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       })
       .transition(this.transition)
       .attr('d', (d: any) => {
-        const height = d.value;
+        const height = d.height;
         return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
       })
       .attr('fill', 'url(#china_bar_right)')
@@ -392,76 +500,78 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
 
 
-    barG.append('path')
+    this.barG.append('path')
       .attr('class', 'frontSauare')
-      .attr('d', (d: any) => {
-        const height = 0;
-        return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
-      })
-      .transition(this.transition)
-      .attr('d', (d: any) => {
-        const height = d.value;
-        return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
-      })
       .attr('fill', 'url(#china_bar_front)')
       .attr('stroke-width', 1)
-      .attr('stroke', 'rgba(0,0,0,0)');
+      .attr('stroke', 'rgba(0,0,0,0)')
+      .attr('d', (d: any) => {
+        const height = 0;
+        return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
+      })
+      .transition(this.transition)
+      .attr('d', (d: any) => {
+        const height = d.height;
+        return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
+      });
 
 
-    barG.append('path')
+
+    this.barG.append('path')
       .attr('class', 'topSauare')
+      .attr('fill', (d: any) => d.height ? '#aedcffb3' : 'none')
+      .attr('stroke-width', 0)
+      .attr('stroke', 'rgba(0,0,0,0)')
       .attr('d', (d: any) => {
         const height = 0;
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
       })
       .transition(this.transition)
       .attr('d', (d: any) => {
-        const height = d.value;
+        const height = d.height;
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
-      })
-      .attr('fill', `#aedcffb3`).attr('stroke-width', 1)
-      .attr('stroke', 'rgba(0,0,0,0)');
+      });
   }
 
   private drawMapMarker(gNodes: any) {
     if (!this.showMarker) {
       return false;
     }
-    const markG = gNodes.append('g')
+    this.markerG = gNodes.append('g')
       .attr('class', 'markG data-shape-child')
       .attr('transform', `translate(${-3},${-40}) scale(0.8, 1)`);
 
-    markG.append('rect')
+    this.markerG.append('rect')
       .attr('class', 'text-wrap')
       .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
-      .attr('width', (d: any) => this.getTextWidth(d.value.toFixed(2)))
+      .attr('width', (d: any) => d.value ? this.getTextWidth(d.value.toFixed(2)) : 0)
       .attr('height', '24')
       .attr('fill', 'url(#china_marker_color)')
       .attr('y', '-13')
       .attr('transform', `translate(5,0)`);
 
-    markG.append('text')
+    this.markerG.append('text')
       .attr('class', 'marker-text')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .attr('fill', '#cec396')
-      .text((d: any) => d.value.toFixed(2))
+      .text((d: any) => d.value ? d.value.toFixed(2) : '')
       .attr('transform', `translate(5,0)`);
 
-    markG.append('path')
+    this.markerG.append('path')
       .attr('class', 'arrow-icon')
       .attr('d', (d: any) => {
         const c = 0;
         const dh = 12 + 3;
         return `M${c},${dh} L${c + 4},${dh} L${c},${dh + 8}, L${c - 4},${dh} Z`;
       })
-      .attr('fill', '#aedcff')
+      .attr('fill', (d: any) => d.height ? '#aedcff' : 'none')
       .attr('transform', `translate(5,0)`);
 
-    this.drawMarkFrame(markG);
+    this.drawMarkFrame(this.markerG);
 
-    markG.transition(this.transition)
-      .attr('transform', (d: any) => `translate(${-3},${- d.value - 40}) scale(0.8, 1)`);
+    this.markerG.transition(this.transition)
+      .attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
   }
 
   private drawMarkFrame(markG: any) {
@@ -479,7 +589,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M${c + frameW},${dh} L${c},${dh}`;
       })
       .attr('stroke', '#aedcff')
-      .attr('stroke-width', 2);
+      .attr('stroke-width', (d: any) => d.height ? 2 : 0);
 
     frameGNode.append('path')
       .attr('class', 'marker-frame marker-frame-right-top')
@@ -489,7 +599,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M${c},${dh} L${c + frameW},${dh}`;
       })
       .attr('stroke', '#aedcff')
-      .attr('stroke-width', 2);
+      .attr('stroke-width', (d: any) => d.height ? 2 : 0);
 
     frameGNode.append('path')
       .attr('class', 'marker-frame marker-frame-left-bottom')
@@ -499,7 +609,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M${c + frameW},${dh} L${c},${dh}`;
       })
       .attr('stroke', '#aedcff')
-      .attr('stroke-width', 2);
+      .attr('stroke-width', (d: any) => d.height ? 2 : 0);
 
     frameGNode.append('path')
       .attr('class', 'marker-frame marker-frame-right-bottom')
@@ -509,7 +619,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M${c},${dh} L${c + frameW},${dh}`;
       })
       .attr('stroke', '#aedcff')
-      .attr('stroke-width', 2);
+      .attr('stroke-width', (d: any) => d.height ? 2 : 0);
   }
 
   private createGradient() {
