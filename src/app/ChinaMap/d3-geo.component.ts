@@ -179,8 +179,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private barDegree = 1 / 1000;
 
-  private center = [0, 0];
-
   private transition: any;
 
   private showMarker = true;
@@ -233,14 +231,10 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private getChinaMapData() {
     Promise.all([this.getChinaJSON(), this.getChinaMapOutLine()]).then((res: any) => {
-      const chinaMapData = res[0].features;
-      const chinaMapOutlineData = res[1].features;
-      this.center = res[0].cp;
+      const projection = this.initProjection(res[0].cp);
+      this.drawChinaOutLineMap(res[1].features, projection);
 
-      const projection = this.initProjection();
-      this.drawChinaOutLineMap(chinaMapOutlineData, projection);
-
-      const gNodes = this.initGNodes(chinaMapData, 'china-map');
+      const gNodes = this.initGNodes(res[0].features, 'china-map');
       this.drawChinaMap(gNodes, projection);
       this.drawMapData(gNodes, projection);
       this.isLodadingMapDtaCompleted = true;
@@ -249,9 +243,9 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private initProjection() {
+  private initProjection(center: any[] = [0, 0]) {
     return d3.geoMercator()
-      .center(this.center)
+      .center(center)
       .scale(this.scale)
       .translate([this.svgW / 2, this.svgH / 2]);
   }
