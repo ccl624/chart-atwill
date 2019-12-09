@@ -125,7 +125,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         offset: 1, color: '#f0302e', opacity: 0
       }],
     }
-  }
+  };
 
   @Input() public markColor: any = {
     normal: {
@@ -173,7 +173,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     if (this.isLodadingMapDtaCompleted) {
       this.updateMapData();
     }
-  };
+  }
 
   private isLodadingMapDtaCompleted = false;
 
@@ -290,10 +290,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('stroke', '#9fc8e7')
       .attr('stroke-width', 2);
 
-    const attr = {
-      name: 'stroke-width',
-      values: ['0', '2'],
-    };
+    const attr = { name: 'stroke-width', values: ['0', '2'], };
+
     this.bling(path, attr, '0');
   }
 
@@ -308,8 +306,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private drawChinaMap(gNodes: any, projection: any) {
-    const mapG = gNodes.append('g')
-      .attr('class', 'mapG');
+    const mapG = gNodes.append('g').attr('class', 'mapG');
 
     mapG.append('path')
       .attr('class', 'batman-path')
@@ -354,11 +351,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = data ? data.value / maxData * 100 : 0;
         d = Object.assign(d, { value, height });
       })
-      .on('mouseout', function () {
+      .on('mouseout', function() {
         const node = d3.select(this);
         that.activeNodes(node, false);
       })
-      .on('mouseover', function (d: any, index: number) {
+      .on('mouseover', function(d: any, index: number) {
         if (d.height) {
           const preNode = that.hightestLevelG.select('.data-shape-wrap');
           if (!preNode.empty()) {
@@ -393,11 +390,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     const that = this;
     this.hightestLevelG = this.svg.append('g')
       .attr('class', 'hightest-Level-g')
-      .on('mouseover', function (d: any, index: number) {
+      .on('mouseover', function(d: any, index: number) {
         const node = d3.select(this);
         that.activeNodes(node, true);
       })
-      .on('mouseout', function (d: any, index: number) {
+      .on('mouseout', function(d: any, index: number) {
         const node = d3.select(this).selectAll('.data-shape-wrap');
         that.activeNodes(node, false);
       });
@@ -425,8 +422,8 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private drawCpName(nodes: any) {
-    const cpNmaeG = nodes.append('g')
-      .attr('class', 'cp-name data-shape-child');
+    const cpNmaeG = nodes.append('g').attr('class', 'cp-name data-shape-child');
+
     cpNmaeG.append('text')
       .text((d: any) => d.properties.name)
       .attr('transform', 'translate(-8,0) scale(0.8)')
@@ -446,6 +443,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     const z = this.barSize.h;
     const x = this.barSize.x;
     const w = this.barSize.w;
+
     this.barG.style('display', (d: any) => (d.height ? 'block' : 'none'))
       .selectAll('.rightSauare')
       .transition(this.transition)
@@ -453,6 +451,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = d.height;
         return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
       });
+
     this.barG.selectAll('.frontSauare')
       .transition(this.transition)
       .attr('d', (d: any) => {
@@ -479,15 +478,13 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.markerG.selectAll('.marker-text').text((d: any) => d.value ? d.value.toFixed(2) : '');
     this.markerG.selectAll('.arrow-icon').attr('fill', (d: any) => d.value ? '#aedcff' : 'none');
     this.markerG.selectAll('.marker-frame').attr('stroke-width', (d: any) => d.value ? 2 : 0);
-    this.markerG.transition(this.transition)
-      .attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
+    this.markerG.transition(this.transition).attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
   }
 
   private drawMapBar(gNodes: any) {
     const z = this.barSize.h;
     const x = this.barSize.x;
     const w = this.barSize.w;
-    const that = this;
 
     this.barG = gNodes.append('g')
       .attr('class', 'barG data-shape-child')
@@ -585,8 +582,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
     this.drawMarkFrame(this.markerG);
 
-    this.markerG.transition(this.transition)
-      .attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
+    this.markerG.transition(this.transition).attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
   }
 
   private drawMarkFrame(markG: any) {
