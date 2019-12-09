@@ -162,7 +162,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     }
   };
 
-  @Input() public scale = 1000;
+  @Input() public scale = 900;
 
   @Input()
   public get data(): any[] {
@@ -210,9 +210,9 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private initSvg() {
-    const d3GeoNode = d3.select('#d3-geo').nodes()[0];
-    this.svgW = d3GeoNode.getBoundingClientRect().width;
-    this.svgH = d3GeoNode.getBoundingClientRect().height;
+    const d3GeoNode = d3.select('#d3-geo');
+    this.svgW = Number.parseFloat(d3GeoNode.style('width'));
+    this.svgH =  Number.parseFloat(d3GeoNode.style('height'));
     this.svg = d3.select('#d3-geo').append('svg')
       .attr('width', this.svgW)
       .attr('height', this.svgH);
@@ -271,21 +271,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private getChinaMapOutLine() {
-    const promise = new Promise(resolve => {
-      this.d3GeoService.getChinaMapOutlineJSON().subscribe((res: any) => {
-        resolve(res);
-      });
-    });
-    return promise;
+    return new Promise(resolve => this.d3GeoService.getChinaMapOutlineJSON().subscribe((res: any) => resolve(res)));
   }
 
   private getChinaJSON() {
-    const promise = new Promise(resolve => {
-      this.d3GeoService.getChinaJSON().subscribe((res: any) => {
-        resolve(res);
-      });
-    });
-    return promise;
+    return new Promise(resolve => this.d3GeoService.getChinaJSON().subscribe((res: any) => resolve(res)));
   }
 
   private initProjection() {
