@@ -185,15 +185,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private showMarker = true;
 
-  private hightestLevelG: any; // svg画布最高层占位元素 用来存放当前被选中的元素 解决重叠问题
-
   private barG: any;
 
   private markerG: any;
 
   private dataShapeG: any;
-
-  private activeBarIndex: number;
 
   constructor(
     private d3GeoService: D3GeoService
@@ -224,7 +220,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.defs = this.svg.append('defs');
   }
 
-  private startAnimate(){
+  private startAnimate() {
     setInterval(() => {
       this.showData = [
         {
@@ -268,7 +264,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       const gNodes = this.initGNodes(chinaMapData, 'china-map');
       this.drawChinaMap(gNodes, projection);
       this.drawMapData(gNodes, projection);
-      this.drawTopG();
       this.isLodadingMapDtaCompleted = true;
 
       this.startAnimate();
@@ -385,31 +380,15 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = data ? data.value / maxData * 100 : 0;
         d = Object.assign(d, { value, height });
       })
-      .on('mouseout', function () {
+      .on('mouseout', function() {
         const node = d3.select(this);
         that.activeNodes(node, false);
       })
-      .on('mouseover', function (d: any, index: number) {
-        if (d.height) {
-          const preNode = that.hightestLevelG.select('.data-shape-wrap');
-          if (!preNode.empty()) {
-            const id = preNode.attr('id');
-            const preIndex = id.substring(15);
-            d3.selectAll('#data-shape-g' + preIndex).node().appendChild(preNode.node().cloneNode(true));
-            preNode.remove();
-          }
+      .on('mouseover', function(d: any, index: number) {
+        const node = d3.select(this);
+        that.activeNodes(node, true);
 
-          const node = d3.select(this);
-          this.activeBarIndex = index;
-          that.activeNodes(node, true);
-          that.hightestLevelG
-            .attr('transform', `translate(${projection(d.properties.cp)})`)
-            .node()
-            .appendChild(this.childNodes[0]);
-
-          d3.select(this).selectAll('.data-shape-wrap').remove();
-        }
-
+        that.svg.selectAll('.china-map').sort((a: any, b: any) => a.properties.name === d.properties.name ? 1 : -1);
       });
 
     const wrapG = this.dataShapeG.append('g')
@@ -421,45 +400,17 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.drawMapMarker(wrapG);
   }
 
-  private drawTopG() {
-    const that = this;
-    this.hightestLevelG = this.svg.append('g')
-      .attr('class', 'hightest-Level-g')
-      .on('mouseover', function (d: any, index: number) {
-        const node = d3.select(this);
-        that.activeNodes(node, true);
-      })
-      .on('mouseout', function (d: any, index: number) {
-        const node = d3.select(this).selectAll('.data-shape-wrap');
-        that.activeNodes(node, false);
-      });
-  }
-
   private updateMapData() {
-    let activeData: any;
     this.dataShapeG.each((d: any, index: number) => {
       const data = this.showData.find(dataItem => dataItem.name === d.properties.name);
       const maxData = Math.max.apply(null, this.showData.map(item => item.value));
       const value = data ? data.value : 0;
       const height = data ? data.value / maxData * 100 : 0;
       d = Object.assign(d, { value, height });
-
-      if (index === this.activeBarIndex) {
-        activeData = d;
-      }
     });
+
     this.updateMapBar(this.barG);
     this.updateMarker(this.markerG);
-
-    // this.hightestLevelG.select('.data-shape-wrap').remove();
-    const preNode = this.hightestLevelG.select('.data-shape-wrap');
-    if (!preNode.empty() && !!activeData) {
-      preNode.data([activeData]).enter();
-      const barNode = preNode.selectAll('.barG');
-      const markerNode = preNode.selectAll('.markG');
-      this.updateMapBar(barNode);
-      this.updateMarker(markerNode);
-    }
   }
 
   private drawCpName(nodes: any) {
