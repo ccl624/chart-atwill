@@ -212,38 +212,19 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   private initSvg() {
     const d3GeoNode = d3.select('#d3-geo');
     this.svgW = Number.parseFloat(d3GeoNode.style('width'));
-    this.svgH =  Number.parseFloat(d3GeoNode.style('height'));
-    this.svg = d3.select('#d3-geo').append('svg')
-      .attr('width', this.svgW)
-      .attr('height', this.svgH);
-
+    this.svgH = Number.parseFloat(d3GeoNode.style('height'));
+    this.svg = d3.select('#d3-geo').append('svg').attr('width', this.svgW).attr('height', this.svgH);
     this.defs = this.svg.append('defs');
   }
 
   private startAnimate() {
     setInterval(() => {
       this.showData = [
-        {
-          name: '新疆',
-          value: 993 * Math.random()
-        },
-        {
-          name: '西藏',
-          value: 667 * Math.random()
-        },
-        {
-          name: '北京',
-          value: 667 * Math.random()
-        },
-        {
-          name: '天津',
-          value: 667 * Math.random()
-        }
-        ,
-        {
-          name: '河南',
-          value: 667 * Math.random()
-        }
+        { name: '新疆', value: 993 * Math.random() },
+        { name: '西藏', value: 667 * Math.random() },
+        { name: '北京', value: 667 * Math.random() },
+        { name: '天津', value: 667 * Math.random() },
+        { name: '河南', value: 667 * Math.random() }
       ];
 
       this.updateMapData();
@@ -257,9 +238,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       this.center = res[0].cp;
 
       const projection = this.initProjection();
-      const gFilterNodes = this.initGNodes(chinaMapOutlineData, 'china-map-filter');
-      this.drawChinaFilterMap(gFilterNodes, projection);
-      this.drawChinaOutLineMap(gFilterNodes, projection);
+      this.drawChinaOutLineMap(chinaMapOutlineData, projection);
 
       const gNodes = this.initGNodes(chinaMapData, 'china-map');
       this.drawChinaMap(gNodes, projection);
@@ -286,24 +265,28 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private initGNodes(data: any[], classStr: string) {
-    const gNodes = this.svg.selectAll(classStr).data(data).enter().append('g').attr('class', classStr);
-    return gNodes;
+    return this.svg.selectAll(classStr).data(data).enter().append('g').attr('class', classStr);
   }
 
-  private drawChinaFilterMap(gNodes: any, projection: any, hasFilter = true) {
+  private drawChinaOutLineMap(data: any, projection: any) {
+    const gNodes = this.svg.selectAll('.china-map-outline')
+      .data(data)
+      .enter()
+      .append('g')
+      .attr('class', 'china-map-outline');
+
     gNodes.append('path')
-      .attr('transform', hasFilter ? 'translate(0,15)' : 'none')
-      .attr('class', 'batman-path')
+      .attr('transform', 'translate(0,15)')
+      .attr('class', 'outline-filter')
       .attr('d', d3.geoPath(projection))
       .attr('fill', 'none')
       .attr('stroke', '#9fc8e7')
-      .attr('filter', hasFilter ? 'url(#china_map_filter)' : 'none')
+      .attr('filter', 'url(#china_map_filter)')
       .attr('stroke-width', '1');
-  }
 
-  private drawChinaOutLineMap(gNodes: any, projection: any) {
-    const path = gNodes.append('path')
-      .attr('class', 'outline-path')
+
+    const outLine = gNodes.append('path')
+      .attr('class', 'outline')
       .attr('d', d3.geoPath(projection))
       .attr('fill', 'none')
       .attr('stroke', '#9fc8e7')
@@ -311,7 +294,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
     const attr = { name: 'stroke-width', values: ['0', '2'], };
 
-    this.bling(path, attr, '0');
+    this.bling(outLine, attr, '0');
   }
 
   private bling(node: any, attr: any, value: string) {
@@ -357,8 +340,17 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.activeCpIcon(node, active);
   }
 
-  private drawMapData(gNodes: any, projection: any) {
+  private mapMouseEvent(node: any) {
     const that = this;
+    node.on('mouseout', function () {
+      that.activeNodes(d3.select(this), false);
+    }).on('mouseover', function (d: any, index: number) {
+      that.activeNodes(d3.select(this), true);
+      that.svg.selectAll('.china-map').sort((a: any, b: any) => a.properties.name === d.properties.name ? 1 : -1);
+    });
+  }
+
+  private drawMapData(gNodes: any, projection: any) {
     this.dataShapeG = gNodes.append('g')
       .attr('class', 'data-shape-g')
       .attr('id', (d: any, index: number) => 'data-shape-g' + index)
@@ -369,25 +361,11 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const value = data ? data.value : 0;
         const height = data ? data.value / maxData * 100 : 0;
         d = Object.assign(d, { value, height });
-      })
-      .on('mouseout', function() {
-        const node = d3.select(this);
-        that.activeNodes(node, false);
-      })
-      .on('mouseover', function(d: any, index: number) {
-        const node = d3.select(this);
-        that.activeNodes(node, true);
+      }).call(this.mapMouseEvent.bind(this));
 
-        that.svg.selectAll('.china-map').sort((a: any, b: any) => a.properties.name === d.properties.name ? 1 : -1);
-      });
-
-    const wrapG = this.dataShapeG.append('g')
-      .attr('id', (d: any, index: number) => 'data-shape-wrap' + index)
-      .attr('class', 'data-shape-wrap');
-    this.drawCpName(wrapG);
-
-    this.drawMapBar(wrapG);
-    this.drawMapMarker(wrapG);
+    this.drawCpName(this.dataShapeG);
+    this.drawMapBar(this.dataShapeG);
+    this.drawMapMarker(this.dataShapeG);
   }
 
   private updateMapData() {
