@@ -216,17 +216,15 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private startAnimate() {
-    setInterval(() => {
-      this.showData = [
-        { name: '新疆', value: 993 * Math.random() },
-        { name: '西藏', value: 667 * Math.random() },
-        { name: '北京', value: 667 * Math.random() },
-        { name: '天津', value: 667 * Math.random() },
-        { name: '河南', value: 667 * Math.random() }
-      ];
+    this.showData = [
+      { name: '新疆', value: 993 * Math.random() },
+      { name: '西藏', value: 667 * Math.random() },
+      { name: '北京', value: 667 * Math.random() },
+      { name: '天津', value: 667 * Math.random() },
+      { name: '河南', value: 667 * Math.random() }
+    ];
 
-      this.updateMapData();
-    }, 1000);
+    this.updateMapData();
   }
 
   private getChinaMapData() {
@@ -239,7 +237,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       this.drawMapData(gNodes, projection);
       this.isLodadingMapDtaCompleted = true;
 
-      this.startAnimate();
+      // this.startAnimate();
     });
   }
 
@@ -302,7 +300,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const value = data ? data.value : 0;
         const height = data ? data.value / maxData * 100 : 0;
         d = Object.assign(d, { value, height });
-      }).call(this.nodeAction.bind(this));
+      }).sort((d: any) => d.height ? -1 : 1).call(this.nodeAction.bind(this));
 
     this.drawCpName(this.dataShapeG);
     this.drawMapBar(this.dataShapeG);
@@ -341,18 +339,23 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
     this.barG.append('path')
       .attr('class', 'rightSauare')
+      .attr('fill', 'url(#china_bar_right)')
+      .attr('stroke-width', 1)
+      .attr('stroke', 'rgba(0,0,0,0)')
       .attr('d', (d: any) => {
         const height = 0;
         return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
       })
       .transition(this.transition)
+      .delay((d: any, i: number) => {
+        // console.log(d.properties.name, d.height);
+
+        return d.height ? i * 1000 : 0;
+      })
       .attr('d', (d: any) => {
         const height = d.height;
         return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
-      })
-      .attr('fill', 'url(#china_bar_right)')
-      .attr('stroke-width', 1)
-      .attr('stroke', 'rgba(0,0,0,0)');
+      });
 
 
 
@@ -366,6 +369,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
       })
       .transition(this.transition)
+      .delay((d: any, i: number) => d.height ? i * 1000 : 0)
       .attr('d', (d: any) => {
         const height = d.height;
         return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
@@ -381,6 +385,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
       })
       .transition(this.transition)
+      .delay((d: any, i: number) => d.height ? i * 1000 : 0)
       .attr('d', (d: any) => {
         const height = d.height;
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
@@ -426,7 +431,19 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
     this.drawMarkFrame(this.markerG);
 
-    this.markerG.transition(this.transition).attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
+    this.markerG.transition(this.transition)
+      .delay((d: any, i: number) => d.height ? i * 1000 : 0)
+      .attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`)
+      .on('end', (d: any, index: number) => {
+
+        if (index === this.showData.length - 1) {
+          const t = setTimeout(() => {
+            this.startAnimate();
+            clearTimeout(t);
+          }, 1000);
+        }
+
+      });
   }
 
   private drawMarkFrame(markG: any) {
@@ -528,7 +545,16 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     markerG.selectAll('.marker-text').text((d: any) => d.value ? d.value.toFixed(2) : '');
     // markerG.selectAll('.arrow-icon').attr('fill', (d: any) => d.value ? '#aedcff' : 'none');
     markerG.selectAll('.marker-frame').attr('stroke-width', (d: any) => d.value ? 2 : 0);
-    markerG.transition(this.transition).attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
+    markerG.transition(this.transition)
+      .attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`)
+      .on('end', (d: any, index: number) => {
+        if (index === this.showData.length - 1) {
+          const t = setTimeout(() => {
+            this.startAnimate();
+            clearTimeout(t);
+          }, 1000);
+        }
+      });
   }
 
   private activeBar(node: any, isActive = true) {
