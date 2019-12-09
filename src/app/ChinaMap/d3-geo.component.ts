@@ -249,14 +249,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private getChinaMapOutLine() {
-    return new Promise(resolve => this.d3GeoService.getChinaMapOutlineJSON().subscribe((res: any) => resolve(res)));
-  }
-
-  private getChinaJSON() {
-    return new Promise(resolve => this.d3GeoService.getChinaJSON().subscribe((res: any) => resolve(res)));
-  }
-
   private initProjection() {
     return d3.geoMercator()
       .center(this.center)
@@ -318,38 +310,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('stroke-width', '2');
   }
 
-  private activeBar(node: any, isActive = true) {
-    node.selectAll('.rightSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
-    node.selectAll('.frontSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
-    node.selectAll('.topSauare').attr('fill', isActive ? '#f0302eb3' : '#aedcffb3');
-  }
-
-  private activeMarker(node: any, isActive = true) {
-    node.select('.markG').selectAll('.text-wrap').attr('fill', isActive ? 'url(#china_marker_color_active)' : 'url(#china_marker_color)');
-    node.select('.markG').selectAll('.arrow-icon').attr('fill', isActive ? '#f0302e' : '#aedcff');
-    node.select('.markG').selectAll('.marker-frame').attr('stroke', isActive ? '#f0302e' : '#aedcff');
-  }
-
-  private activeCpIcon(node: any, isActive = true) {
-    node.select('.cp-icon').attr('fill', isActive ? '#f0302e' : '#cec396');
-  }
-
-  private activeNodes(node: any, active: boolean) {
-    this.activeBar(node, active);
-    this.activeMarker(node, active);
-    this.activeCpIcon(node, active);
-  }
-
-  private mapMouseEvent(node: any) {
-    const that = this;
-    node.on('mouseout', function () {
-      that.activeNodes(d3.select(this), false);
-    }).on('mouseover', function (d: any, index: number) {
-      that.activeNodes(d3.select(this), true);
-      that.svg.selectAll('.china-map').sort((a: any, b: any) => a.properties.name === d.properties.name ? 1 : -1);
-    });
-  }
-
   private drawMapData(gNodes: any, projection: any) {
     this.dataShapeG = gNodes.append('g')
       .attr('class', 'data-shape-g')
@@ -366,78 +326,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.drawCpName(this.dataShapeG);
     this.drawMapBar(this.dataShapeG);
     this.drawMapMarker(this.dataShapeG);
-  }
-
-  private updateMapData() {
-    this.dataShapeG.each((d: any, index: number) => {
-      const data = this.showData.find(dataItem => dataItem.name === d.properties.name);
-      const maxData = Math.max.apply(null, this.showData.map(item => item.value));
-      const value = data ? data.value : 0;
-      const height = data ? data.value / maxData * 100 : 0;
-      d = Object.assign(d, { value, height });
-    });
-
-    this.updateMapBar(this.barG);
-    this.updateMarker(this.markerG);
-  }
-
-  private drawCpName(nodes: any) {
-    const cpNmaeG = nodes.append('g').attr('class', 'cp-name data-shape-child');
-
-    cpNmaeG.append('text')
-      .text((d: any) => d.properties.name)
-      .attr('transform', 'translate(-8,0) scale(0.8)')
-      .attr('text-anchor', 'end')
-      .attr('dominant-baseline', 'middle')
-      .style('fill', '#e7d9a466');
-
-    cpNmaeG.append('circle')
-      .attr('class', 'cp-icon')
-      .attr('r', 3)
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('fill', '#e3d49d');
-  }
-
-  private updateMapBar(barG: any) {
-    const z = this.barSize.h;
-    const x = this.barSize.x;
-    const w = this.barSize.w;
-
-    barG.style('display', (d: any) => (d.height ? 'block' : 'none'))
-      .selectAll('.rightSauare')
-      .transition(this.transition)
-      .attr('d', (d: any) => {
-        const height = d.height;
-        return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
-      });
-
-    barG.selectAll('.frontSauare')
-      .transition(this.transition)
-      .attr('d', (d: any) => {
-        const height = d.height;
-        return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
-      });
-
-    barG.selectAll('.topSauare')
-      .transition(this.transition)
-      .attr('d', (d: any) => {
-        const height = d.height;
-        return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
-      });
-  }
-
-  private updateMarker(markerG: any) {
-    markerG.style('display', (d: any) => (d.height ? 'block' : 'none'))
-      .selectAll('.text-wrap')
-      .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
-      .transition(this.transition)
-      .attr('width', (d: any) => d.value ? this.getTextWidth(d.value.toFixed(2)) : 0);
-
-    markerG.selectAll('.marker-text').text((d: any) => d.value ? d.value.toFixed(2) : '');
-    // markerG.selectAll('.arrow-icon').attr('fill', (d: any) => d.value ? '#aedcff' : 'none');
-    markerG.selectAll('.marker-frame').attr('stroke-width', (d: any) => d.value ? 2 : 0);
-    markerG.transition(this.transition).attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
   }
 
   private drawMapBar(gNodes: any) {
@@ -590,6 +478,110 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('stroke-width', (d: any) => d.height ? 2 : 0);
   }
 
+  private updateMapData() {
+    this.dataShapeG.each((d: any, index: number) => {
+      const data = this.showData.find(dataItem => dataItem.name === d.properties.name);
+      const maxData = Math.max.apply(null, this.showData.map(item => item.value));
+      const value = data ? data.value : 0;
+      const height = data ? data.value / maxData * 100 : 0;
+      d = Object.assign(d, { value, height });
+    });
+
+    this.updateMapBar(this.barG);
+    this.updateMarker(this.markerG);
+  }
+
+  private updateMapBar(barG: any) {
+    const z = this.barSize.h;
+    const x = this.barSize.x;
+    const w = this.barSize.w;
+
+    barG.style('display', (d: any) => (d.height ? 'block' : 'none'))
+      .selectAll('.rightSauare')
+      .transition(this.transition)
+      .attr('d', (d: any) => {
+        const height = d.height;
+        return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
+      });
+
+    barG.selectAll('.frontSauare')
+      .transition(this.transition)
+      .attr('d', (d: any) => {
+        const height = d.height;
+        return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
+      });
+
+    barG.selectAll('.topSauare')
+      .transition(this.transition)
+      .attr('d', (d: any) => {
+        const height = d.height;
+        return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
+      });
+  }
+
+  private updateMarker(markerG: any) {
+    markerG.style('display', (d: any) => (d.height ? 'block' : 'none'))
+      .selectAll('.text-wrap')
+      .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
+      .transition(this.transition)
+      .attr('width', (d: any) => d.value ? this.getTextWidth(d.value.toFixed(2)) : 0);
+
+    markerG.selectAll('.marker-text').text((d: any) => d.value ? d.value.toFixed(2) : '');
+    // markerG.selectAll('.arrow-icon').attr('fill', (d: any) => d.value ? '#aedcff' : 'none');
+    markerG.selectAll('.marker-frame').attr('stroke-width', (d: any) => d.value ? 2 : 0);
+    markerG.transition(this.transition).attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`);
+  }
+
+  private drawCpName(nodes: any) {
+    const cpNmaeG = nodes.append('g').attr('class', 'cp-name data-shape-child');
+
+    cpNmaeG.append('text')
+      .text((d: any) => d.properties.name)
+      .attr('transform', 'translate(-8,0) scale(0.8)')
+      .attr('text-anchor', 'end')
+      .attr('dominant-baseline', 'middle')
+      .style('fill', '#e7d9a466');
+
+    cpNmaeG.append('circle')
+      .attr('class', 'cp-icon')
+      .attr('r', 3)
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('fill', '#e3d49d');
+  }
+
+  private activeBar(node: any, isActive = true) {
+    node.selectAll('.rightSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
+    node.selectAll('.frontSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
+    node.selectAll('.topSauare').attr('fill', isActive ? '#f0302eb3' : '#aedcffb3');
+  }
+
+  private activeMarker(node: any, isActive = true) {
+    node.select('.markG').selectAll('.text-wrap').attr('fill', isActive ? 'url(#china_marker_color_active)' : 'url(#china_marker_color)');
+    node.select('.markG').selectAll('.arrow-icon').attr('fill', isActive ? '#f0302e' : '#aedcff');
+    node.select('.markG').selectAll('.marker-frame').attr('stroke', isActive ? '#f0302e' : '#aedcff');
+  }
+
+  private activeCpIcon(node: any, isActive = true) {
+    node.select('.cp-icon').attr('fill', isActive ? '#f0302e' : '#cec396');
+  }
+
+  private activeNodes(node: any, active: boolean) {
+    this.activeBar(node, active);
+    this.activeMarker(node, active);
+    this.activeCpIcon(node, active);
+  }
+
+  private mapMouseEvent(node: any) {
+    const that = this;
+    node.on('mouseout', function () {
+      that.activeNodes(d3.select(this), false);
+    }).on('mouseover', function (d: any, index: number) {
+      that.activeNodes(d3.select(this), true);
+      that.svg.selectAll('.china-map').sort((a: any, b: any) => a.properties.name === d.properties.name ? 1 : -1);
+    });
+  }
+
   private createGradient() {
     this.createLinearGradient('china_bar_front', this.barColor.normal);
     this.createLinearGradient('china_bar_right', this.barColorRight.normal);
@@ -630,5 +622,13 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     const spanWidth = Number.parseInt(span.style('width'), 10) + 10;
     span.remove();
     return spanWidth;
+  }
+
+  private getChinaMapOutLine() {
+    return new Promise(resolve => this.d3GeoService.getChinaMapOutlineJSON().subscribe((res: any) => resolve(res)));
+  }
+
+  private getChinaJSON() {
+    return new Promise(resolve => this.d3GeoService.getChinaJSON().subscribe((res: any) => resolve(res)));
   }
 }
