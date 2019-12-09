@@ -350,7 +350,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .delay((d: any, i: number) => {
         // console.log(d.properties.name, d.height);
 
-        return d.height ? i * 1000 : 0;
+        return d.height ? i * 300 : 0;
       })
       .attr('d', (d: any) => {
         const height = d.height;
@@ -369,7 +369,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
       })
       .transition(this.transition)
-      .delay((d: any, i: number) => d.height ? i * 1000 : 0)
+      .delay((d: any, i: number) => d.height ? i * 300 : 0)
       .attr('d', (d: any) => {
         const height = d.height;
         return `M0,0 L0,${-height} L${w},${-height} L${w},${0} Z`;
@@ -385,7 +385,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
       })
       .transition(this.transition)
-      .delay((d: any, i: number) => d.height ? i * 1000 : 0)
+      .delay((d: any, i: number) => d.height ? i * 300 : 0)
       .attr('d', (d: any) => {
         const height = d.height;
         return `M0,${-height} L${w},${-height} L${x + w},${-height - z} L${x},${-height - z} Z`;
@@ -432,7 +432,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
     this.drawMarkFrame(this.markerG);
 
     this.markerG.transition(this.transition)
-      .delay((d: any, i: number) => d.height ? i * 1000 : 0)
+      .delay((d: any, i: number) => d.height ? i * 300 : 0)
       .attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`)
       .on('end', (d: any, index: number) => {
 
