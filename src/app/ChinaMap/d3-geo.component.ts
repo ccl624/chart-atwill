@@ -189,7 +189,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
   private dataShapeG: any;
 
-  private preDuration = 200; // 每根柱子动画间隔
+  private preDuration = 100; // 每根柱子动画间隔
 
   constructor(
     private d3GeoService: D3GeoService
@@ -414,8 +414,10 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .attr('fill', '#cec396')
-      .text((d: any) => d.value ? d.value.toFixed(2) : '')
-      .attr('transform', `translate(5,0)`);
+      .attr('transform', `translate(5,0)`)
+      .transition(this.transition)
+      .delay((d: any, i: number) => d.height ? i * this.preDuration : 0)
+      .textTween((d: any) => (t: number) => t * d.value ? (t * d.value).toFixed(2) : '');
 
     this.markerG.append('path')
       .attr('class', 'arrow-icon')
@@ -540,7 +542,9 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .transition(this.transition)
       .attr('width', (d: any) => d.value ? this.getTextWidth(d.value.toFixed(2)) : 0);
 
-    markerG.selectAll('.marker-text').text((d: any) => d.value ? d.value.toFixed(2) : '');
+    markerG.selectAll('.marker-text')
+      .transition(this.transition)
+      .textTween((d: any) => (t: number) => t * d.value ? (t * d.value).toFixed(2) : '');
     // markerG.selectAll('.arrow-icon').attr('fill', (d: any) => d.value ? '#aedcff' : 'none');
     markerG.selectAll('.marker-frame').attr('stroke-width', (d: any) => d.value ? 2 : 0);
     markerG.transition(this.transition)
