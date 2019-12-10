@@ -5,6 +5,7 @@ const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   { path: 'home', loadChildren: './home/home.module#HomeModule' },
   { path: 'd3-geo', loadChildren: './ChinaMap/d3-geo.module#D3GeoModule' },
+  { path: 'guage', loadChildren: './app-guage/app-guage.module#AppGuageModule' },
   { path: '**', pathMatch: 'full', redirectTo: 'd3-geo' }
 ];
 

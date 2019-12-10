@@ -1,0 +1,13 @@
+<div id="{{option.id}}" class="app-guage">
+    <ng-container *ngIf="option.showInput">
+        <div class="sf-echart-ipt" [ngClass]="{'sf-echar-disabled': option.disabled}">
+            <a href="javascript:;" class="sf-add-btn" (click)="optionBtn(-1)"><i class="icon-minus-circle"></i></a>
+            <div class="sf-iptCom">
+                <input type="text" class="sf-iptin" [readonly]="option.disabled" [(ngModel)]="value"
+                    (blur)="inputBlurEvent($event)">
+                <p class="sf-errs" *ngIf="errText">{{errText}}</p>
+            </div>
+            <a href="javascript:;" class="sf-add-btn" (click)="optionBtn(1)"><i class="icon-plus-circle"></i></a>
+        </div>
+    </ng-container>
+</div>

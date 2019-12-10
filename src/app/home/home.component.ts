@@ -14,16 +14,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
   public cardH = 0;
 
   public cardList: any[] = [
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
-    { name: '中国地图', href: '', src: 'assets/image/china_map.png' }
+    { name: '中国地图', link: '/d3-geo', src: 'assets/image/china_map.png' },
+    { name: '仪表盘', link: '/guage', src: 'assets/image/guage.png' }
   ];
 
   constructor() { }
@@ -42,12 +34,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   private resetCardSize() {
-    console.log(this.cardListElement.nativeElement);
 
     const cardLsitP = this.cardListElement.nativeElement.getBoundingClientRect();
     const cardListW = cardLsitP.width;
-    const minWidth = 200;
-    const maxWidth = 300;
 
     if (cardListW > 1600) {
       this.cardH = cardListW / 6 - 20;
