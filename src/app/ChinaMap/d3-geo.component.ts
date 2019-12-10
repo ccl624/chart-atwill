@@ -238,8 +238,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       this.drawChinaMap(gNodes, projection);
       this.drawMapData(gNodes, projection);
       this.isLodadingMapDtaCompleted = true;
-
-      // this.startAnimate();
     });
   }
 
@@ -250,8 +248,15 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .translate([this.svgW / 2, this.svgH / 2]);
   }
 
-  private initGNodes(data: any[], classStr: string) {
-    return this.svg.selectAll(classStr).data(data).enter().append('g').attr('class', classStr);
+  private initGNodes(mapData: any[], classStr: string) {
+    const tarData = mapData.map((d: any) => {
+      const data = this.showData.find(dataItem => dataItem.name === d.properties.name);
+      const maxData = Math.max.apply(null, this.showData.map(item => item.value));
+      const value = data ? data.value : 0;
+      const height = data ? data.value / maxData * 100 : 0;
+      return Object.assign(d, { value, height });
+    }).sort((d: any) => d.height ? -1 : 1);
+    return this.svg.selectAll(classStr).data(tarData).enter().append('g').attr('class', classStr);
   }
 
   private drawChinaOutLineMap(data: any, projection: any) {
@@ -292,17 +297,12 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private drawMapData(gNodes: any, projection: any) {
+
     this.dataShapeG = gNodes.append('g')
       .attr('class', 'data-shape-g')
       .attr('id', (d: any, index: number) => 'data-shape-g' + index)
       .attr('transform', (d: any) => `translate(${projection(d.properties.cp)})`)
-      .each((d: any) => {
-        const data = this.showData.find(dataItem => dataItem.name === d.properties.name);
-        const maxData = Math.max.apply(null, this.showData.map(item => item.value));
-        const value = data ? data.value : 0;
-        const height = data ? data.value / maxData * 100 : 0;
-        d = Object.assign(d, { value, height });
-      }).sort((d: any) => d.height ? -1 : 1).call(this.nodeAction.bind(this));
+      .call(this.nodeAction.bind(this));
 
     this.drawCpName(this.dataShapeG);
     this.drawMapBar(this.dataShapeG);
@@ -354,8 +354,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
         const height = d.height;
         return `M${w},0 L${w},${-height} L${x + w},${-height - z} L${x + w},${-z} L${w},${0} Z `;
       });
-
-
 
     this.barG.append('path')
       .attr('class', 'frontSauare')
@@ -435,7 +433,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       .delay((d: any, i: number) => d.height ? i * this.preDuration : 0)
       .attr('transform', (d: any) => `translate(${-3},${- d.height - 40}) scale(0.8, 1)`)
       .on('end', (d: any, index: number) => {
-
         if (index === this.showData.length - 1) {
           const t = setTimeout(() => {
             this.startAnimate();
