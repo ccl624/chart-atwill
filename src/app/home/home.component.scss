@@ -1,0 +1,15 @@
+.home-wrap{
+  display: flex;
+  height: 100%;
+
+  .charts-menu{
+    width: 180px;
+    height: 100%;
+    border: 1px solid red;
+  }
+
+  .charts-content{
+    flex: 1;
+    height: 100%;
+  }
+}
