@@ -34,19 +34,31 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       name: '西藏',
       value: 667
     },
-    // {
-    //   name: '北京',
-    //   value: 667
-    // },
-    // {
-    //   name: '天津',
-    //   value: 667
-    // }
-    // ,
-    // {
-    //   name: '河南',
-    //   value: 667
-    // }
+    {
+      name: '北京',
+      value: 667
+    },
+    {
+      name: '天津',
+      value: 667
+    },
+    {
+      name: '河南',
+      value: 667
+    },
+    {
+      name: '安徽',
+      value: 667
+    },
+    {
+      name: '四川',
+      value: 667
+    }
+    ,
+    {
+      name: '陕西',
+      value: 667
+    }
   ];
 
   @Input() public barColor: any = {
@@ -373,7 +385,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
 
     this.barG.append('path')
       .attr('class', 'topSauare')
-      .attr('fill', (d: any) => d.height ? '#aedcffb3' : 'none')
+      .attr('fill', '#aedcffb3')
       .attr('stroke-width', 0)
       .attr('stroke', 'rgba(0,0,0,0)')
       .attr('d', (d: any) => {
@@ -525,7 +537,6 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
       });
 
     barG.selectAll('.topSauare')
-      .attr('fill', (d: any) => d.height ? '#aedcffb3' : 'none')
       .transition(this.transition)
       .attr('d', (d: any) => {
         const height = d.height;

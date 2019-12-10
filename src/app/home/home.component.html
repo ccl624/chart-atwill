@@ -5,6 +5,8 @@
     </ul>
   </div>
   <div class="charts-content">
-
+    <ul #cardListElement class="chart-card-list">
+      <li *ngFor="let item of cardList" class="chart-card" [ngStyle]="{'height': cardH + 'px'}"></li>
+    </ul>
   </div>
 </div>

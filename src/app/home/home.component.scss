@@ -1,15 +1,41 @@
 .home-wrap{
   display: flex;
   height: 100%;
+  // margin: 0 100px;
 
   .charts-menu{
     width: 180px;
     height: 100%;
     border: 1px solid red;
+    display: none;
   }
 
   .charts-content{
     flex: 1;
     height: 100%;
+    padding: 20px;
+
+    .chart-card-list{
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+}
+
+.chart-card{
+  width: calc(16.66% - 20px);
+  border: 1px solid green;
+  margin: 10px;
+}
+
+@media screen and (max-width: 1600px) {
+  .chart-card {
+     width: calc(20% - 20px);
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .chart-card {
+     width: calc(25% - 20px);
   }
 }
