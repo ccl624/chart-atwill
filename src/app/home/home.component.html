@@ -6,7 +6,14 @@
   </div>
   <div class="charts-content">
     <ul #cardListElement class="chart-card-list">
-      <li *ngFor="let item of cardList" class="chart-card" [ngStyle]="{'height': cardH + 'px'}"></li>
+      <li *ngFor="let card of cardList" class="chart-card">
+        <a [ngStyle]="{'height': cardH * 0.8 + 'px', 'width': cardH + 'px'}" href="">
+          <h4>{{card?.name}}</h4>
+          <div class="card-img">
+            <img [attr.src]="card.src" alt="图片加载失败">
+          </div>
+        </a>
+      </li>
     </ul>
   </div>
 </div>

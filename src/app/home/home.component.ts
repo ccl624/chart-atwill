@@ -14,16 +14,16 @@ export class HomeComponent implements OnInit, AfterViewInit {
   public cardH = 0;
 
   public cardList: any[] = [
-    { name: '中国地图', imgHref: '', src: '' },
-    { name: '中国地图', imgHref: '', src: '' },
-    { name: '中国地图', imgHref: '', src: '' },
-    { name: '中国地图', imgHref: '', src: '' },
-    { name: '中国地图', imgHref: '', src: '' },
-    { name: '中国地图', imgHref: '', src: '' },
-    { name: '中国地图', imgHref: '', src: '' },
-    { name: '中国地图', imgHref: '', src: '' },
-    { name: '中国地图', imgHref: '', src: '' },
-    { name: '中国地图', imgHref: '', src: '' }
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' },
+    { name: '中国地图', href: '', src: 'assets/image/china_map.png' }
   ];
 
   constructor() { }
@@ -48,6 +48,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
     const cardListW = cardLsitP.width;
     const minWidth = 200;
     const maxWidth = 300;
-    this.cardH = cardListW / 5 * 0.618;
+
+    if (cardListW > 1600) {
+      this.cardH = cardListW / 6 - 20;
+    } else if (cardListW < 1600 && cardListW > 1200) {
+      this.cardH = cardListW / 5 - 20;
+    } else if (cardListW < 1200 && cardListW > 800) {
+      this.cardH = cardListW / 4 - 20;
+    } else {
+      this.cardH = cardListW / 3 - 20;
+    }
   }
 }
