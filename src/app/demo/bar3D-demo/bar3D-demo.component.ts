@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-bar-demo',
-  templateUrl: './bar-demo.component.html',
-  styleUrls: ['./bar-demo.component.scss']
+  selector: 'app-bar3D-demo',
+  templateUrl: './bar3D-demo.component.html',
+  styleUrls: ['./bar3D-demo.component.scss']
 })
-export class BarDemoComponent implements OnInit {
+export class Bar3DDemoComponent implements OnInit {
 
   public option: any;
 
@@ -13,6 +13,7 @@ export class BarDemoComponent implements OnInit {
 
   public ngOnInit() {
     this.option = {
+      theme: 'SquarePillars',
       chartId: 'workTime1',
       title: {
         show: true,
@@ -24,14 +25,14 @@ export class BarDemoComponent implements OnInit {
         show: false,
         data: [
           {
-              name: '机器1工作时长',
-              color1: 'linear-gradient(#a16cd9, #1ac1f1)',
+            name: '机器1工作时长',
+            color1: 'linear-gradient(#a16cd9, #1ac1f1)',
           },
           {
-              name: '机器2工作时长',
-              color1: 'linear-gradient(#fe4183, #fcb967)',
+            name: '机器2工作时长',
+            color1: 'linear-gradient(#fe4183, #fcb967)',
           }
-      ]
+        ]
       },
       tooltip: {
         trigger: 'axis',
@@ -66,109 +67,160 @@ export class BarDemoComponent implements OnInit {
           bottom: 40
         }
       ],
-      xAxis: [
+      xAxis3D: [
         {
           type: 'category',
           name: '日期',
+          gridIndex: 0,
+          axisTick: { show: false },
           data: [],
-          axisTick: {
-            alignWithLabel: true,
-            show: true,
-          },
           axisLine: {
-            show: true,
-            color: '#f0f3f6'
+            show: false,
+          },
+          splitLine: {
+            show: false
           },
           axisLabel: {
             color: '#333f4c'
           },
-          splitLine: {
-            show: true,
-            color: '#f0f3f6'
-          }
         }
       ],
-      yAxis: [
+      yAxis3D: [
         {
           type: 'value',
           name: '时长（h）',
-          // min: 0,
-          // max: null,
-          nameTextStyle: {
-            fontWeight: 'bold',
-            color: '#333'
+          axisLabel: {
+            show: true,
+            color: '#8391a1'
+          },
+          splitLine: {
+            show: true,
+            color: '#eee'
           },
           axisLine: {
             show: true,
-            color: '#f0f3f6'
+            color: '#eee'
           },
           axisTick: {
-            color: '#f0f3f6'
-          },
-          axisLabel: {
-            color: '#8391a1'
-          },
-          scale: true,
-          splitLine: {
             show: true,
-            color: '#f0f3f6'
+            color: '#eee',
+            num: 4,
+          },
+          axisName: {
+            show: true,
+            color: '#333f4c'
+          },
+          axisBottom: {
+            show: true,
+            color: '#eaebec',
+            borderColor: '#eee'
           }
         }
       ],
       series: [
         {
           name: '机器1工作时长',
-          type: 'bar',
+          type: 'bar3D',
           stack: '总量',
-          barMaxWidth: 35,
+          barMaxWidth: 25,
+          gridIndex: 0,
           itemStyle: {
-            color: {
+            color: 'rgba(64,247,223, 0.9)',
+            topColor: {
               type: 'linear',
               x1: 0,
               x2: 0,
               y1: 0,
               y2: 1,
               colorStops: [{
-                offset: 0, color: '#a16cd9' // 0% 处的颜色
+                offset: 0, color: '#2ff6de' // 0% 处的颜色
               }, {
-                offset: 1, color: '#1ac1f1' // 100% 处的颜色
+                offset: 1, color: '#25dcc8' // 100% 处的颜色
               }],
-            }
+            },
+            bottomColor: 'rgba(20,188,168, 0.5)',
+            frontColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#2ef7e0' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#1eccb8' // 100% 处的颜色
+              }],
+            },
+            rightColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#24dec8' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#19b9a6' // 100% 处的颜色
+              }],
+            },
           },
-          label: {
-            normal: {
-              show: true,
-              position: 'insideBottom',
-              formatter(params) { },
-              rotate: 90,
-              align: 'left',
-              verticalAlign: 'middle',
-              color: '#333f4c'
-            }
-          },
-          data: []
+          data: [],
+          symbol: {
+            show: true
+          }
         },
         {
           name: '机器2工作时长',
-          type: 'bar',
+          type: 'bar3D',
           stack: '总量',
-          barMaxWidth: 35,
+          // barWidth: 25,
+          barMaxWidth: 25,
+          // barWidth: 40,
           itemStyle: {
-            color: {
+            color: 'rgba(248,66,133, 0.9)',
+            topColor: {
               type: 'linear',
               x1: 0,
               x2: 0,
               y1: 0,
               y2: 1,
               colorStops: [{
-                offset: 0, color: '#fe4183' // 0% 处的颜色
+                offset: 0, color: '#fcaac8' // 0% 处的颜色
               }, {
-                offset: 1, color: '#fcb967' // 100% 处的颜色
+                offset: 1, color: '#fb87b2' // 100% 处的颜色
               }],
-            }
+            },
+            bottomColor: 'rgba(229,57,120, 0.5)',
+            frontColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#fba0c2' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#f83e83' // 100% 处的颜色
+              }],
+            },
+            rightColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#f987b1' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#e3407d' // 100% 处的颜色
+              }],
+            },
           },
-          data: []
-        },
+          data: [],
+          symbol: {
+            show: true
+          }
+        }
       ]
     };
 
@@ -177,7 +229,7 @@ export class BarDemoComponent implements OnInit {
       const date = this.formatDate(curDay + index * 1000 * 60 * 60 * 24, 'yyyy-MM-dd');
       const dataItem = Math.random() * 100;
       const dataItem2 = Math.random() * 60 + 10;
-      this.option.xAxis[0].data.push(date);
+      this.option.xAxis3D[0].data.push(date);
       this.option.series[0].data.push(dataItem.toFixed(2));
       this.option.series[1].data.push(dataItem2.toFixed(2));
     }

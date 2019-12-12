@@ -8,6 +8,7 @@ const routes: Routes = [
   { path: 'guage-demo', loadChildren: './demo/guage-demo/guage-demo.module#GuageDemoModule' },
   { path: 'line-demo', loadChildren: './demo/line-demo/line-demo.module#LineDemoModule' },
   { path: 'bar-demo', loadChildren: './demo/bar-demo/bar-demo.module#BarDemoModule' },
+  { path: 'bar3D-demo', loadChildren: './demo/bar3D-demo/bar3D-demo.module#Bar3DDemoModule' },
   { path: '**', pathMatch: 'full', redirectTo: 'home' }
 ];
 
