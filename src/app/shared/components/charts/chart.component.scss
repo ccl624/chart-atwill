@@ -1,0 +1,147 @@
+.sf-chart {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  .tooltipBox {
+    display: none;
+    position: absolute;
+    pointer-events:none;
+    top: 200px;
+    left: 200px;
+    min-width: 50px;
+    padding: 15px 10px;
+    border-radius: 20px;
+    border: 2px solid #fff;
+    transform: translateY(-50%);
+    background: #2ef9e1e6;
+    background: rgba(46, 249, 225, 0.9);
+    box-shadow: 0px 0px 10px #2ef9e1;
+
+    i {
+      display: block;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      position: absolute;
+      z-index: 1;
+    }
+
+    i.blur {
+      filter: blur(5px);
+      z-index: 0;
+    }
+  }
+
+  .tipBoxRight {
+    i.blur {
+      border-width: 7px 7px 7px 0;
+      border-color: transparent #2ef9e1 transparent transparent;
+      left: -10px;
+      top: 50%;
+      margin-top: -6px;
+    }
+
+    i.triangle-border {
+
+      border-width: 7px 7px 7px 0;
+      border-color: transparent #fff transparent transparent;
+      left: -7px;
+      top: 50%;
+      /* 三角形居中显示 */
+      margin-top: -6px;
+      /* 三角形居中显示 */
+
+      i {
+        border-width: 5px 5px 5px 0;
+        border-color: transparent #2ef9e1 transparent transparent;
+        left: 2px;
+        top: -5px;
+      }
+    }
+  }
+
+  .tipBoxLeft {
+    transform: translate(-100%, -50%);
+    i.blur {
+      border-width: 7px 0px 7px 7px;
+      border-color: transparent transparent transparent #2ef9e1;
+      right: -10px;
+      top: 50%;
+      margin-top: -6px;
+    }
+
+    i.triangle-border {
+      border-width: 7px 0px 7px 6px;
+      border-color: transparent transparent transparent #fff;
+      right: -7px;
+      top: 50%;
+      /* 三角形居中显示 */
+      margin-top: -7px;
+      /* 三角形居中显示 */
+
+      i {
+        border-width: 5px 0 5px 5px;
+        border-color: transparent transparent transparent #2ef9e1;
+        right: 2px;
+        top: -5px;
+      }
+    }
+  }
+
+  .tipBoxTop {
+    i.blur {
+      border-width: 0px 7px 7px 7px;
+      border-color: transparent transparent #2ef9e1 transparent;
+      left: 50%;
+      top: -7px;
+      margin-left: -6px;
+    }
+
+    i.triangle-border {
+
+      border-width: 0px 7px 7px 7px;
+      border-color: transparent transparent #fff transparent;
+      left: 50%;
+      top: -7px;
+      /* 三角形居中显示 */
+      margin-left: -6px;
+      /* 三角形居中显示 */
+
+      i {
+        border-width: 0 5px 5px 5px;
+        border-color: transparent transparent #2ef9e1 transparent;
+        top: 2px;
+        left: -5px;
+      }
+    }
+  }
+
+  .tipBoxBottom {
+    i.blur {
+      border-width: 7px 7px 0px 7px;
+      border-color: #2ef9e1 transparent transparent transparent;
+      left: 50%;
+      bottom: -7px;
+      margin-left: -6px;
+    }
+
+    i.triangle-border {
+
+      border-width: 7px 7px 0px 7px;
+      border-color: #fff transparent transparent transparent;
+      left: 50%;
+      bottom: -7px;
+      /* 三角形居中显示 */
+      margin-left: -6px;
+      /* 三角形居中显示 */
+
+      i {
+        border-width: 5px 5px 0 5px;
+        border-color: #2ef9e1 transparent transparent transparent;
+        bottom: 2px;
+        left: -5px;
+      }
+    }
+  }
+}

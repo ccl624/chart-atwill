@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
-import { D3GeoComponent } from './d3-geo.component';
-import { D3GeoService } from './d3-geo.service';
+import { ChinaMapComponent } from './china-map.component';
+import { ChinaMapService } from './china-map.service';
 const routes: Routes = [
-  { path: '', component: D3GeoComponent }
+  { path: '', component: ChinaMapComponent }
 ];
 
 @NgModule({
@@ -12,10 +12,10 @@ const routes: Routes = [
     CommonModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [D3GeoComponent],
-  providers: [D3GeoService]
+  declarations: [ChinaMapComponent],
+  providers: [ChinaMapService]
 })
 
-export class D3GeoModule { }
+export class ChinaMapModule { }
 
 

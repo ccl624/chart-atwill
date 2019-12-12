@@ -1,15 +1,15 @@
 import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
-import { D3GeoService } from './d3-geo.service';
+import { ChinaMapService } from './china-map.service';
 import * as d3 from 'd3';
 import 'd3-geo-projection';
 
 @Component({
-  selector: 'd3-geo',
-  templateUrl: './d3-geo.component.html',
-  styleUrls: ['./d3-geo.component.scss']
+  selector: 'china-map',
+  templateUrl: './china-map.component.html',
+  styleUrls: ['./china-map.component.scss']
 })
 
-export class D3GeoComponent implements OnInit, AfterViewInit {
+export class ChinaMapComponent implements OnInit, AfterViewInit {
 
   private svgH = 0;  //
 
@@ -204,7 +204,7 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   private preDuration = 100; // 每根柱子动画间隔
 
   constructor(
-    private d3GeoService: D3GeoService
+    private chinaMapService: ChinaMapService
   ) { }
 
   public ngOnInit() {
@@ -669,10 +669,10 @@ export class D3GeoComponent implements OnInit, AfterViewInit {
   }
 
   private getChinaMapOutLine() {
-    return new Promise(resolve => this.d3GeoService.getChinaMapOutlineJSON().subscribe((res: any) => resolve(res)));
+    return new Promise(resolve => this.chinaMapService.getChinaMapOutlineJSON().subscribe((res: any) => resolve(res)));
   }
 
   private getChinaJSON() {
-    return new Promise(resolve => this.d3GeoService.getChinaJSON().subscribe((res: any) => resolve(res)));
+    return new Promise(resolve => this.chinaMapService.getChinaJSON().subscribe((res: any) => resolve(res)));
   }
 }

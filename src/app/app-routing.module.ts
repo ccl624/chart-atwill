@@ -4,8 +4,9 @@ import { Routes, RouterModule } from '@angular/router';
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   { path: 'home', loadChildren: './home/home.module#HomeModule' },
-  { path: 'd3-geo', loadChildren: './ChinaMap/d3-geo.module#D3GeoModule' },
+  { path: 'china-map', loadChildren: './demo/china-map/china-map.module#ChinaMapModule' },
   { path: 'guage-demo', loadChildren: './demo/guage-demo/guage-demo.module#GuageDemoModule' },
+  { path: 'line-demo', loadChildren: './demo/line-demo/line-demo.module#LineDemoModule' },
   { path: '**', pathMatch: 'full', redirectTo: 'home' }
 ];
 

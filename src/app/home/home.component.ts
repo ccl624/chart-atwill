@@ -14,8 +14,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   public cardH = 0;
 
   public cardList: any[] = [
+    { name: '折线图', link: '/line-demo', src: 'assets/image/line-demo.png' },
     { name: '仪表盘', link: '/guage-demo', src: 'assets/image/guage.png' },
-    { name: '中国地图', link: '/d3-geo', src: 'assets/image/china_map.png' },
+    { name: '中国地图', link: '/china-map', src: 'assets/image/china_map.png' },
   ];
 
   constructor() { }
