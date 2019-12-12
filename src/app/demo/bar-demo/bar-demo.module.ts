@@ -1,21 +1,21 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
-import { LineDemoComponent } from './line-demo.component';
+import { BarDemoComponent } from './bar-demo.component';
 import { DemoContainerModule, ChartModule } from 'src/app/shared';
 
 const routes: Routes = [
-  { path: '', component: LineDemoComponent }
+  { path: '', component: BarDemoComponent }
 ];
 
 @NgModule({
-  declarations: [LineDemoComponent],
+  declarations: [BarDemoComponent],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
     DemoContainerModule,
     ChartModule
   ],
-  exports: [LineDemoComponent]
+  exports: [BarDemoComponent]
 })
-export class LineDemoModule { }
+export class BarDemoModule { }

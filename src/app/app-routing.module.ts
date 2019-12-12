@@ -7,6 +7,7 @@ const routes: Routes = [
   { path: 'china-map', loadChildren: './demo/china-map/china-map.module#ChinaMapModule' },
   { path: 'guage-demo', loadChildren: './demo/guage-demo/guage-demo.module#GuageDemoModule' },
   { path: 'line-demo', loadChildren: './demo/line-demo/line-demo.module#LineDemoModule' },
+  { path: 'bar-demo', loadChildren: './demo/bar-demo/bar-demo.module#BarDemoModule' },
   { path: '**', pathMatch: 'full', redirectTo: 'home' }
 ];
 

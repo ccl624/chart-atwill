@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-line-demo',
-  templateUrl: './line-demo.component.html',
-  styleUrls: ['./line-demo.component.scss']
+  selector: 'app-bar-demo',
+  templateUrl: './bar-demo.component.html',
+  styleUrls: ['./bar-demo.component.scss']
 })
-export class LineDemoComponent implements OnInit {
+export class BarDemoComponent implements OnInit {
 
   public option: any;
 
@@ -13,7 +13,7 @@ export class LineDemoComponent implements OnInit {
 
   public ngOnInit() {
     this.option = {
-      chartId: 'workTime',
+      chartId: 'workTime1',
       title: {
         show: true,
         text: '20天工作时长变化趋势 ',
@@ -24,10 +24,14 @@ export class LineDemoComponent implements OnInit {
         show: false,
         data: [
           {
-            name: '故障率',
-            color1: '#f04b49',
+              name: '机器1工作时长',
+              color1: 'linear-gradient(#a16cd9, #1ac1f1)',
+          },
+          {
+              name: '机器2工作时长',
+              color1: 'linear-gradient(#fe4183, #fcb967)',
           }
-        ]
+      ]
       },
       tooltip: {
         trigger: 'axis',
@@ -113,43 +117,69 @@ export class LineDemoComponent implements OnInit {
       ],
       series: [
         {
-          name: '开机率',
-          type: 'line',
+          name: '机器1工作时长',
+          type: 'bar',
+          stack: '总量',
+          barMaxWidth: 35,
           itemStyle: {
-            color: '#fca156'
-          },
-          lineStyle: {
-            color: '#fca156',
-            shadowColor: 'rgba(0,0,0,0.02)',
-            shadowBlur: 3,
-            shadowOffsetY: 5
-          },
-          areaStyle: {
             color: {
               type: 'linear',
-              x: 0,
-              y: 0,
+              x1: 0,
               x2: 0,
+              y1: 0,
               y2: 1,
               colorStops: [{
-                offset: 0, color: 'rgba(252, 161, 86, 0.3)' // 0% 处的颜色
+                offset: 0, color: '#a16cd9' // 0% 处的颜色
               }, {
-                offset: 1, color: 'rgba(255,255,255,0)' // 100% 处的颜色
+                offset: 1, color: '#1ac1f1' // 100% 处的颜色
               }],
-              global: false // 缺省为 false
+            }
+          },
+          label: {
+            normal: {
+              show: true,
+              position: 'insideBottom',
+              formatter(params) { },
+              rotate: 90,
+              align: 'left',
+              verticalAlign: 'middle',
+              color: '#333f4c'
             }
           },
           data: []
-        }
+        },
+        {
+          name: '机器2工作时长',
+          type: 'bar',
+          stack: '总量',
+          barMaxWidth: 35,
+          itemStyle: {
+            color: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#fe4183' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#fcb967' // 100% 处的颜色
+              }],
+            }
+          },
+          data: []
+        },
       ]
     };
 
     const curDay = new Date().getTime();
     for (let index = 0; index < 20; index++) {
       const date = this.formatDate(curDay + index * 1000 * 60 * 60 * 24, 'yyyy-MM-dd');
-      const dataItem = (Math.random() * 100).toFixed(2);
+      const dataItem = Math.random() * 100;
+      const dataItem2 = Math.random() * 60;
       this.option.xAxis[0].data.push(date);
-      this.option.series[0].data.push(dataItem);
+      this.option.series[0].data.push(dataItem.toFixed(2));
+      this.option.series[1].data.push(dataItem2.toFixed(2));
     }
 
     console.log(this.option);
