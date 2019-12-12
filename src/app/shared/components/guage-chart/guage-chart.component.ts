@@ -2,12 +2,12 @@ import { Component, OnInit, AfterViewInit, Input, Output, EventEmitter, Template
 import * as d3 from 'd3';
 
 @Component({
-  selector: 'app-guage',
-  templateUrl: './app-guage.component.html',
-  styleUrls: ['./app-guage.component.scss'],
+  selector: 'guage-chart',
+  templateUrl: './guage-chart.component.html',
+  styleUrls: ['./guage-chart.component.scss'],
 })
 
-export class AppGuageComponent implements OnInit, AfterViewInit {
+export class GuageChartComponent implements OnInit, AfterViewInit {
   private svg: any;
   private svgH = 0;
   private svgW = 0;
@@ -43,7 +43,7 @@ export class AppGuageComponent implements OnInit, AfterViewInit {
     unit: 'm/s',
     showInput: true,
     fixed: 0,
-    ply: 30
+    ply: 20
   };
   private pointer: any;
   private pointerR = 0;
