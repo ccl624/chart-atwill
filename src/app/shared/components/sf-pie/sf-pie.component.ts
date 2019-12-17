@@ -24,7 +24,8 @@ export class SfPieComponent implements OnInit, AfterViewInit {
         label: {
           show: true,
           borderWidth: 1,
-          background: '#ffffff'
+          background: '#ffffff',
+          borderColor: '#bbb'
         },
         data: [
           { name: 'bbbdddddddd', value: 11 },
@@ -43,8 +44,12 @@ export class SfPieComponent implements OnInit, AfterViewInit {
           { name: 'aaa13', value: 11 },
           { name: 'aaa14', value: 2 },
           { name: 'aaa15', value: 3 },
-          { name: 'aaa16', value: 3 },
-          { name: 'aaa17cccccccccccccccccccccccccccccc', value: 5 },
+          { name: 'aaa16', value: 4 },
+          { name: 'aaa17', value: 5 },
+          { name: 'aaa11', value: 11 },
+          { name: 'aaa12', value: 11 },
+          { name: 'aaa13', value: 11 },
+          { name: 'aaa14', value: 2 },
         ]
       },
       {
@@ -62,6 +67,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
           { name: 'aaa3', value: 11 },
           { name: 'aaa4', value: 11 },
           { name: 'aaa5', value: 11 },
+          { name: 'aaa6', value: 11 },
         ],
       },
     ]
@@ -130,18 +136,33 @@ export class SfPieComponent implements OnInit, AfterViewInit {
         d.mx = Math.sin(d.arc) * pieParams.centerR;
         d.cx = d.mx + pieParams.centerX;
         d.cy = d.my + pieParams.centerY;
+
+
+        let disArc = 0;
+        if (d.arc < Math.PI / 2) {
+          disArc = Math.PI / 4 - d.arc;
+        } else if (d.arc < Math.PI && d.arc > Math.PI / 2) {
+          disArc = Math.PI * 3 / 4 - d.arc;
+        } else if (d.arc > Math.PI && d.arc < Math.PI * 3 / 2) {
+          disArc = d.arc - Math.PI * 5 / 4;
+        } else if (d.arc > Math.PI * 3 / 2 && d.arc < Math.PI * 2) {
+          disArc = d.arc - Math.PI * 7 / 4;
+        }
+
+        d.labelArc = d.arc + disArc;
+        d.labelDisR = 20 / Math.cos(disArc);
         return d;
       });
   }
 
   // 添加鼠标事件
   private addMouseEvent(nodes: any, arcPathEnter: any, arcPath: any, centerX: number, centerY: number, isInnerLabel: boolean) {
-    nodes.on('mouseenter', function(d: any, index: number) {
+    nodes.on('mouseenter', function (d: any, index: number) {
       if (!isInnerLabel) {
         this.parentNode.appendChild(this);
       }
       d3.select(this).select('.pie-path').transition().duration(300).attr('d', arcPathEnter(d));
-    }).on('mouseleave', function(d: any, index: number) {
+    }).on('mouseleave', function (d: any, index: number) {
       if (!d.data.selected && index !== nodes.nodes().length - 1) {
         this.parentNode.insertBefore(this, this.parentNode.childNodes[index]);
       } else if (!d.data.selected && index === nodes.nodes().length - 1) {
@@ -173,22 +194,22 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
   private drawOuterLable(pieNodes: any, pieParams: any, seriesItem: any, colors: string[]) {
     const borderRadius = (seriesItem.label && seriesItem.label.borderRadius) || 3;
+    const borderColor = (seriesItem.label && seriesItem.label.borderColor) || 'none';
     const height = (seriesItem.label && seriesItem.label.height) || 24;
     const width = seriesItem.label && seriesItem.label.width;
     const isShow = seriesItem.label && seriesItem.label.show;
     const borderWidth = (seriesItem.label && seriesItem.label.borderWidth) || 1;
-    const background = (seriesItem.label && seriesItem.label.background) || '#ffffff';
+    const background = (seriesItem.label && seriesItem.label.background) || 'none';
 
     pieNodes.append('path')
       .attr('d', (d: any) => {
         const borderCenterX = Math.sin(d.arc) * pieParams.endR;
         const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
-        const disR = 20;
         const disX = Math.sin(d.arc) > 0 ? 1 : -1;
         return `
               M${borderCenterX},${borderCenterY}
-              L${borderCenterX + disR * Math.sin(d.arc)},${borderCenterY - disR * Math.cos(d.arc)}
-              L${borderCenterX + disR * Math.sin(d.arc) + disX * 20},${borderCenterY - disR * Math.cos(d.arc)}
+              L${borderCenterX + d.labelDisR * Math.sin(d.labelArc)},${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
+              L${borderCenterX + d.labelDisR * Math.sin(d.labelArc) + disX * 20},${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
                `;
       })
       .attr('stroke', '#999').attr('stroke-width', 0.5)
@@ -200,16 +221,18 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       .attr('ry', borderRadius)
       .attr('width', (d: any) => width || d.width)
       .attr('height', height)
-      .attr('stroke', (d: any, index: number) => !isShow ? 'none' : colors[index])
+      .attr('stroke', borderColor)
       .attr('stroke-width', borderWidth)
       .attr('fill', background)
       .attr('transform', (d: any) => {
         const rectW = width || d.width;
         const borderCenterX = Math.sin(d.arc) * pieParams.endR;
         const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
-        const disR = 20;
         const disX = Math.sin(d.arc) > 0 ? 20 : - rectW - 20;
-        return `translate(${borderCenterX + disR * Math.sin(d.arc) + disX},${borderCenterY - disR * Math.cos(d.arc) - 12})`;
+        return `translate(
+          ${borderCenterX + d.labelDisR * Math.sin(d.labelArc) + disX},
+          ${borderCenterY - d.labelDisR * Math.cos(d.labelArc) - height / 2 - 1}
+          )`;
       });
 
     pieNodes.append('text')
@@ -224,9 +247,11 @@ export class SfPieComponent implements OnInit, AfterViewInit {
         const rectW = width || d.width;
         const borderCenterX = Math.sin(d.arc) * pieParams.endR;
         const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
-        const disR = 20;
         const disX = Math.sin(d.arc) > 0 ? 25 : - 25;
-        return `translate(${borderCenterX + disR * Math.sin(d.arc) + disX},${borderCenterY - disR * Math.cos(d.arc)})`;
+        return `translate(
+          ${borderCenterX + d.labelDisR * Math.sin(d.labelArc) + disX},
+          ${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
+          )`;
       });
   }
 
@@ -257,11 +282,20 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
     pieNodes.append('path')
       .attr('class', 'pie-path')
-      .attr('d', (d: any) => arcPath(d))
-      .attr('fill', (d: any, index: number) => colors[index])
+      .attr('fill', 'none')
       .attr('stroke', '#ffffff')
       .attr('stroke-width', 0)
-      .attr('style', 'cursor:pointer');
+      .attr('style', 'cursor:pointer')
+      .transition()
+      .duration(500)
+      .attrTween('d', (d: any) => {
+        return (t: number) => {
+          return arcPath({
+            startAngle: d.startAngle * t,
+            endAngle: d.endAngle * t
+          });
+        };
+      }).attr('fill', (d: any, index: number) => colors[index]);
   }
 
   // 画label
@@ -327,9 +361,9 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
   private getTextWidth(str: string, fontSize = 14) {
     const span = d3.select('body').append('span')
-    .style('display', 'inline-block')
-    .style('font-size', fontSize + 'px')
-    .text(str);
+      .style('display', 'inline-block')
+      .style('font-size', fontSize + 'px')
+      .text(str);
     const spanWidth = Number.parseFloat(span.style('width')) + 10;
     span.remove();
     return spanWidth;
