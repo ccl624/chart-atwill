@@ -46,10 +46,9 @@ export class SfPieComponent implements OnInit, AfterViewInit {
           { name: 'aaa15', value: 3 },
           { name: 'aaa16', value: 4 },
           { name: 'aaa17', value: 5 },
-          { name: 'aaa11', value: 11 },
-          { name: 'aaa12', value: 11 },
-          { name: 'aaa13', value: 11 },
-          { name: 'aaa14', value: 2 },
+          { name: 'aaa11', value: 2 },
+          { name: 'aaa12', value: 2 },
+          { name: 'aaa13', value: 2 }
         ]
       },
       {
@@ -80,6 +79,12 @@ export class SfPieComponent implements OnInit, AfterViewInit {
   private svg: any;
 
   private selection: any[];
+
+  private selectedRise = 8;
+
+  private hoverRise = 10;
+
+  private outerLabelG: any;
 
   constructor() { }
 
@@ -140,16 +145,16 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
         let disArc = 0;
         if (d.arc < Math.PI / 2) {
-          disArc = Math.PI / 4 - d.arc;
+          disArc = d.arc - Math.PI / 4;
         } else if (d.arc < Math.PI && d.arc > Math.PI / 2) {
-          disArc = Math.PI * 3 / 4 - d.arc;
+          disArc = d.arc - Math.PI * 3 / 4;
         } else if (d.arc > Math.PI && d.arc < Math.PI * 3 / 2) {
           disArc = d.arc - Math.PI * 5 / 4;
         } else if (d.arc > Math.PI * 3 / 2 && d.arc < Math.PI * 2) {
           disArc = d.arc - Math.PI * 7 / 4;
         }
 
-        d.labelArc = d.arc + disArc;
+        d.labelArc = d.arc - disArc;
         d.labelDisR = 20 / Math.cos(disArc);
         return d;
       });
@@ -157,6 +162,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
   // 添加鼠标事件
   private addMouseEvent(nodes: any, arcPathEnter: any, arcPath: any, centerX: number, centerY: number, isInnerLabel: boolean) {
+    const that = this;
     nodes.on('mouseenter', function (d: any, index: number) {
       if (!isInnerLabel) {
         this.parentNode.appendChild(this);
@@ -173,8 +179,8 @@ export class SfPieComponent implements OnInit, AfterViewInit {
     }).on('click', function (d: any, index: number) {
       nodes.each((d1: any) => d1.data.selected = false);
       d.data.selected = true;
-      const dx = Math.sin(d.arc) * 5;
-      const dy = -Math.cos(d.arc) * 5;
+      const dx = Math.sin(d.arc) * that.selectedRise;
+      const dy = -Math.cos(d.arc) * that.selectedRise;
       d3.selectAll('.pieG').transition().duration(300).attr('transform', `translate(${centerX},${centerY})`);
       d3.select(this).transition().duration(300).attr('transform', `translate(${centerX + dx},${centerY + dy})`);
       d3.selectAll('.pie-label-g').transition().duration(300).attr('transform', `translate(${centerX},${centerY})`);
@@ -201,42 +207,35 @@ export class SfPieComponent implements OnInit, AfterViewInit {
     const borderWidth = (seriesItem.label && seriesItem.label.borderWidth) || 1;
     const background = (seriesItem.label && seriesItem.label.background) || 'none';
 
-    pieNodes.append('path')
-      .attr('d', (d: any) => {
-        const borderCenterX = Math.sin(d.arc) * pieParams.endR;
-        const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
-        const disX = Math.sin(d.arc) > 0 ? 1 : -1;
-        return `
-              M${borderCenterX},${borderCenterY}
-              L${borderCenterX + d.labelDisR * Math.sin(d.labelArc)},${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
-              L${borderCenterX + d.labelDisR * Math.sin(d.labelArc) + disX * 20},${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
-               `;
-      })
+    this.outerLabelG = pieNodes.append('g')
+      .attr('class', 'outer-label-g');
+    this.outerLabelG.append('path')
+      .attr('class', 'label-point-line')
+      // .attr('d', (d: any) => {
+      //   const borderCenterX = Math.sin(d.arc) * pieParams.endR;
+      //   const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
+      //   const disX = Math.sin(d.arc) > 0 ? 1 : -1;
+      //   return `
+      //         M${borderCenterX},${borderCenterY}
+      //         L${borderCenterX + d.labelDisR * Math.sin(d.labelArc)},${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
+      //         L${borderCenterX + d.labelDisR * Math.sin(d.labelArc) + disX * 20},${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
+      //          `;
+      // })
       .attr('stroke', '#999').attr('stroke-width', 0.5)
       .attr('fill', 'none');
 
-    pieNodes.append('rect')
-      .attr('class', 'pie-label-rect')
+    this.outerLabelG.append('rect')
+      .attr('class', 'outer-label-rect')
       .attr('rx', borderRadius)
       .attr('ry', borderRadius)
       .attr('width', (d: any) => width || d.width)
       .attr('height', height)
       .attr('stroke', borderColor)
       .attr('stroke-width', borderWidth)
-      .attr('fill', background)
-      .attr('transform', (d: any) => {
-        const rectW = width || d.width;
-        const borderCenterX = Math.sin(d.arc) * pieParams.endR;
-        const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
-        const disX = Math.sin(d.arc) > 0 ? 20 : - rectW - 20;
-        return `translate(
-          ${borderCenterX + d.labelDisR * Math.sin(d.labelArc) + disX},
-          ${borderCenterY - d.labelDisR * Math.cos(d.labelArc) - height / 2 - 1}
-          )`;
-      });
+      .attr('fill', background);
 
-    pieNodes.append('text')
-      .attr('class', 'pie-label')
+    this.outerLabelG.append('text')
+      .attr('class', 'outer-label-text')
       .text((d: any) => d.data.name)
       .attr('fill', (d: any, index: number) => !isShow ? 'none' : colors[index])
       .attr('dominant-baseline', 'middle')
@@ -261,7 +260,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
     const centerX = pieParams.centerX;
     const centerY = pieParams.centerY;
     const arcPath = this.initArcPath(pieParams.startR, pieParams.endR, seriesItem.padAngle, seriesItem.cornerRadius);
-    const arcPathEnter = this.initArcPath(pieParams.startR, pieParams.endR + 8, seriesItem.padAngle, seriesItem.cornerRadius);
+    const arcPathEnter = this.initArcPath(pieParams.startR, pieParams.endR + this.hoverRise, seriesItem.padAngle, seriesItem.cornerRadius);
     const pieNodes = wrapNode.selectAll('.pieG')
       .data(pieData)
       .enter()
@@ -269,8 +268,8 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       .attr('class', 'pieG')
       .attr('id', (d: any) => 'pieG' + d.id)
       .attr('transform', (d: any) => {
-        const dx = Math.sin(d.arc) * 5;
-        const dy = -Math.cos(d.arc) * 5;
+        const dx = Math.sin(d.arc) * this.selectedRise;
+        const dy = -Math.cos(d.arc) * this.selectedRise;
         return `translate(${centerX + (d.data.selected ? dx : 0)},${centerY + (d.data.selected ? dy : 0)})`;
       });
 
@@ -309,8 +308,8 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       .attr('class', 'pie-label-g')
       .attr('id', (d: any) => 'pieLabel' + d.id)
       .attr('transform', (d: any) => {
-        const dx = Math.sin(d.arc) * 5;
-        const dy = -Math.cos(d.arc) * 5;
+        const dx = Math.sin(d.arc) * this.selectedRise;
+        const dy = -Math.cos(d.arc) * this.selectedRise;
         return `translate(${centerX + (d.data.selected ? dx : 0)},${centerY + (d.data.selected ? dy : 0)})`;
       });
 
@@ -344,7 +343,50 @@ export class SfPieComponent implements OnInit, AfterViewInit {
         that.drawPiePath(nodeG, pieData, d, pieParams, colors);
         if (d.label.position === 'inner') {
           that.drawInnerLabel(nodeG, pieData, pieParams, d, colors);
+        } else {
+          that.createForceSimulation(pieData, pieParams, d);
         }
+      });
+  }
+
+  private createForceSimulation(nodes: any[], pieParams: any, seriesItem: any) {
+
+    const height = (seriesItem.label && seriesItem.label.height) || 24;
+    const width = seriesItem.label && seriesItem.label.width;
+
+    const forceLink = d3.forceCollide(10);
+    const forceY = d3.forceY((d: any) => {
+      return -Math.cos(d.arc) * (pieParams.endR + 20);
+    });
+    const forceX = d3.forceX((d: any) => {
+      return Math.sin(d.arc) * (pieParams.endR + 20);
+    });
+
+    const simulation = d3.forceSimulation(nodes)
+      .force('link', forceLink)
+      .force('x', forceX)
+      .force('y', forceY)
+      .on('tick', () => {
+        this.outerLabelG.selectAll('.label-point-line')
+          .attr('d', (d: any) => {
+            const borderCenterX = Math.sin(d.arc) * pieParams.endR;
+            const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
+            const disX = Math.sin(d.arc) > 0 ? 1 : -1;
+            return `M${borderCenterX},${borderCenterY} L${d.x},${d.y} L${d.x + disX * 20},${d.y}`;
+          });
+
+        this.outerLabelG.selectAll('.outer-label-rect')
+          .attr('transform', (d: any) => {
+            const rectW = width || d.width;
+            const disX = Math.sin(d.arc) > 0 ? 20 : - rectW - 20;
+            return `translate(${d.x + disX},${d.y - height / 2 - 1})`;
+          });
+
+        this.outerLabelG.selectAll('.outer-label-text')
+          .attr('transform', (d: any) => {
+            const disX = Math.sin(d.arc) > 0 ? 25 : - 25;
+            return `translate(${d.x + disX},${d.y})`;
+          });
       });
   }
 
