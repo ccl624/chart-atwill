@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Input, Output, AfterViewInit, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
 import * as d3 from 'd3';
 
 @Component({
@@ -7,70 +7,15 @@ import * as d3 from 'd3';
   styleUrls: ['./sf-pie.component.scss']
 })
 export class SfPieComponent implements OnInit, AfterViewInit {
+  @Input() public option: any = {};
 
-  @Input() public option: any = {
-    id: 'sf-pie',
-    color: ['#1264fb', '#1b79fa', '#4b96fc', '#5fbefb',
-      '#7be3fd', '#34c6d8', '#7460ee', '#a26ad8', '#d96bcc', '#fb9715',
-      '#fdc75e', '#c3da6e', '#afea77', '#7adf7a', '#4ad35b', '#87eed0',
-      '#a3f5dd', '#6cdbbb', '#96e3fd', '#fe9d9d', '#fa7676', '#fb6262'
-    ],
-    series: [
-      {
-        radius: ['60%', '80%'],
-        center: ['50%', '50%'],
-        padAngle: 0.01,
-        cornerRadius: 2,
-        label: {
-          show: true,
-          borderWidth: 1,
-          background: '#ffffff',
-          borderColor: '#bbb'
-        },
-        data: [
-          { name: 'bbbdddddddd', value: 11 },
-          { name: 'aaa1', value: 11 },
-          { name: 'aaa2', value: 11 },
-          { name: 'aaa3', value: 11 },
-          { name: 'aaa4', value: 11 },
-          { name: 'aaa5', value: 11 },
-          { name: 'aaa6', value: 11 },
-          { name: 'aaa7', value: 11 },
-          { name: 'aaa8', value: 11 },
-          { name: 'aaa9', value: 11 },
-          { name: '床前明月光，疑是地上霜', value: 11 },
-          { name: 'aaa11', value: 11 },
-          { name: 'aaa12', value: 11 },
-          { name: 'aaa13', value: 11 },
-          { name: 'aaa14', value: 2 },
-          { name: 'aaa15', value: 3 },
-          { name: 'aaa16', value: 4 },
-          { name: 'aaa17', value: 5 },
-          { name: 'aaa11', value: 2 },
-          { name: 'aaa12', value: 2 },
-          { name: 'aaa13', value: 2 }
-        ]
-      },
-      {
-        radius: ['0%', '50%'],
-        center: ['50%', '50%'],
-        padAngle: 0,
-        cornerRadius: 2,
-        label: {
-          show: true,
-          position: 'inner'
-        },
-        data: [
-          { name: 'aaa1', value: 11 },
-          { name: 'aaa2', value: 11 },
-          { name: 'aaa3', value: 11 },
-          { name: 'aaa4', value: 11 },
-          { name: 'aaa5', value: 11 },
-          { name: 'aaa6', value: 11 },
-        ],
-      },
-    ]
-  };
+  @Output() public onSelect = new EventEmitter<any>();
+
+  @Output() public onPieInit = new EventEmitter<any>();
+
+  private isLoaded = false;
+
+  private id: string;
 
   private svgW = 0;
 
@@ -86,24 +31,233 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
   private outerLabelG: any;
 
-  constructor() { }
+  private currentIndex = 1;
+
+  private currentLefts: number[] = [0];
+
+  private legendColors: string[] = [];
+
+  private legendIndex = 0;
+
+  private pieIndex = 0;
+
+  private totalData: any[] = [];
+
+  constructor() {}
+
+  public ngOnChanges(changes: SimpleChanges) {
+    if (changes.hasOwnProperty('option')) {
+      this.initPie(false);
+    }
+  }
 
   public ngOnInit() {
-
+    this.id = this.option.id + new Date().getTime();
+    const pieIntance: any = {
+      initPie: this.initPie.bind(this)
+    };
+    this.onPieInit.emit(pieIntance);
   }
 
   public ngAfterViewInit() {
-    const wrapDom = d3.select('#' + this.option.id);
-    this.svgW = Number.parseFloat(wrapDom.style('width'));
-    this.svgH = Number.parseFloat(wrapDom.style('height'));
+    this.initPie(true);
+    this.isLoaded = true;
+  }
 
-    this.initSvg(wrapDom);
+  private resetParams() {
+    this.currentLefts = [0];
+    this.totalData = [];
+    this.legendColors = [];
+    this.legendIndex = 0;
+  }
 
-    this.drawPie(this.option.series);
+  private initPie(isFirstLoad = true) {
+    this.resetParams();
+    if (this.isLoaded || isFirstLoad) {
+      const wrapDom = d3.select('#' + this.id);
+      const hasSvg = wrapDom.select('svg');
+      if (hasSvg) {
+        hasSvg.remove();
+      }
+      this.svgW = Number.parseFloat(wrapDom.style('width'));
+      this.svgH = Number.parseFloat(wrapDom.style('height'));
+      this.initSvg(wrapDom);
+      this.legendColors = this.option.color || this.option.legend.data.map((dataItem: any, index: number) => d3.interpolateViridis(index / this.option.legend.data.length));
+      this.drawPie(this.option.series);
+      this.initLegend(this.option.legend);
+    }
+  }
+
+  private legendItem(legendWrap: any, data: any[]) {
+    const that = this;
+    const legendItemWrap = legendWrap
+      .append('g')
+      .attr('class', 'legend-item-wrap')
+      .attr('id', 'legendItemWrap' + this.id)
+      .attr('transform', `translate(0, 14)`);
+
+    const legendGnodes = legendItemWrap
+      .selectAll('.legend-item-g')
+      .data(data)
+      .enter()
+      .append('g')
+      .attr('class', 'legend-item-g')
+      .style('cursor', 'pointer')
+      .attr('transform', (d: any, i: number) => {
+        return `translate(${d.left},${this.svgH - 40})`;
+      })
+      .on('mouseenter', function(d: any, index: number) {
+        const pieNode = d3.select('#pieG' + that.id + index);
+        const pieData = that.totalData[index];
+        if (!pieData.isInner) {
+          pieNode.node().parentNode.appendChild(pieNode.node());
+        }
+        const arcPathEnter = pieData.arcPathEnter;
+        pieNode
+          .select('.pie-path')
+          .transition()
+          .duration(300)
+          .attr('d', arcPathEnter(pieData));
+      })
+      .on('mouseleave', function(d: any, index: number) {
+        const pieSelection = d3.select('#pieG' + that.id + index);
+        const pieNode = pieSelection.node();
+        const pieData = that.totalData[index];
+        if (!pieData.data.selected && !d.isLast) {
+          pieNode.parentNode.insertBefore(pieNode, pieNode.parentNode.childNodes[pieData.index]);
+        } else if (!pieData.data.selected && d.isLast) {
+          pieNode.parentNode.insertBefore(pieNode, pieNode.parentNode.childNodes[pieData.index - 1]);
+        }
+        const arcPath = that.totalData[index].arcPath;
+        pieSelection
+          .select('.pie-path')
+          .transition()
+          .duration(300)
+          .attr('d', arcPath(that.totalData[index]));
+      });
+
+    legendGnodes
+      .append('rect')
+      .attr('rx', 3)
+      .attr('ry', 3)
+      .attr('width', 24)
+      .attr('height', 12)
+      .attr('fill', (d: any, i: number) => this.legendColors[i]);
+
+    legendGnodes
+      .append('text')
+      .text(d => d.value)
+      .attr('fill', (d: any, i: number) => this.legendColors[i])
+      .attr('dominant-baseline', 'middle')
+      .attr('text-anchor', 'start')
+      .style('font-size', '12px')
+      .attr('transform', `translate(${27},7)`);
+  }
+
+  private activeBth(legendSwitchBtn: any, pageTotal: number) {
+    legendSwitchBtn
+      .select('.left-btn')
+      .attr('fill', this.currentIndex === 1 ? '#ccc' : '#000000')
+      .attr('cursor', this.currentIndex === 1 ? 'auto' : 'pointer');
+
+    legendSwitchBtn
+      .select('.right-btn')
+      .attr('fill', this.currentIndex === pageTotal ? '#ccc' : '#000000')
+      .attr('cursor', this.currentIndex === pageTotal ? 'auto' : 'pointer');
+
+    legendSwitchBtn.select('.current-page-text').text(`${this.currentIndex}/${pageTotal}`);
+  }
+
+  private moveLegend() {
+    d3.select('#legendItemWrap' + this.id)
+      .transition()
+      .duration(300)
+      .attr('transform', `translate(${-this.currentLefts[this.currentIndex - 1] + 5}, 14)`);
+  }
+
+  private drawSwitchBtn(legendWrap: any, data: any[]) {
+    const that = this;
+    const prePageWidth = this.svgW - 66;
+    let pageTotal = 1;
+    let startLeft = 0;
+    data.forEach(item => {
+      if (item.right - startLeft > prePageWidth) {
+        pageTotal++;
+        startLeft = item.left;
+        that.currentLefts.push(startLeft);
+      }
+    });
+
+    const legendSwitchBtn = legendWrap
+      .append('g')
+      .attr('class', 'legend-switch-btn')
+      .attr('transform', `translate(${this.svgW - 66},${this.svgH - 40})`);
+
+    legendSwitchBtn
+      .append('rect')
+      .attr('class', 'btn-cover')
+      .attr('fill', '#ffffff')
+      .attr('width', 66)
+      .attr('height', 40);
+
+    legendSwitchBtn
+      .append('path')
+      .attr('class', 'left-btn')
+      .attr('d', `M10,0 L0,7 L10,14 Z`)
+      .attr('fill', this.currentIndex === 1 ? '#ccc' : '#000000')
+      .attr('transform', `translate(${5},13)`)
+      .attr('cursor', this.currentIndex === 1 ? 'auto' : 'pointer')
+      .on('click', () => {
+        if (this.currentIndex !== 1) {
+          this.currentIndex--;
+          this.moveLegend();
+        }
+        this.activeBth(legendSwitchBtn, pageTotal);
+      });
+
+    legendSwitchBtn
+      .append('path')
+      .attr('class', 'right-btn')
+      .attr('d', `M0,0 L10,7 L0,14 Z`)
+      .attr('fill', this.currentIndex === pageTotal ? '#ccc' : '#000000')
+      .attr('transform', `translate(${51},13)`)
+      .attr('cursor', this.currentIndex === pageTotal ? 'auto' : 'pointer')
+      .on('click', () => {
+        if (this.currentIndex !== pageTotal) {
+          this.currentIndex++;
+          this.moveLegend();
+        }
+        this.activeBth(legendSwitchBtn, pageTotal);
+      });
+
+    legendSwitchBtn
+      .append('text')
+      .attr('class', 'current-page-text')
+      .text(`${this.currentIndex}/${pageTotal}`)
+      .style('font-size', '12px')
+      .attr('dominant-baseline', 'middle')
+      .attr('text-anchor', 'middle')
+      .attr('transform', `translate(${33},21)`);
+  }
+
+  private initLegend(legend: any) {
+    const data = legend.data.map((item: string) => ({ value: item, left: 0, right: 0 }));
+    data.reduce((positionX: number, item) => {
+      item.left = positionX;
+      item.right = positionX + this.getTextWidth(item.value, 12) + 24;
+      return item.right;
+    }, 0);
+
+    const legendWrap = this.svg.append('g').attr('class', 'legend-wrap-g');
+
+    this.legendItem(legendWrap, data);
+
+    this.drawSwitchBtn(legendWrap, data);
   }
 
   private initSvg(dom: any) {
-    this.svg = dom.append('svg')
+    this.svg = dom
+      .append('svg')
       .attr('class', 'sf-pie-chart')
       .attr('width', this.svgW)
       .attr('height', this.svgH);
@@ -111,8 +265,8 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
   private getPieParams(seriesItem: any) {
     const rMax = Math.min(this.svgW, this.svgH);
-    const startR = this.setRatio(seriesItem.radius[0]) * rMax / 2;
-    const endR = this.setRatio(seriesItem.radius[1]) * rMax / 2;
+    const startR = (this.setRatio(seriesItem.radius[0]) * rMax) / 2;
+    const endR = (this.setRatio(seriesItem.radius[1]) * rMax) / 2;
     const centerX = this.setRatio(seriesItem.center[0]) * this.svgW;
     const centerY = this.setRatio(seriesItem.center[1]) * this.svgH;
     const centerR = startR + (endR - startR) / 2;
@@ -120,85 +274,107 @@ export class SfPieComponent implements OnInit, AfterViewInit {
   }
 
   // 创建饼图生成器
-  private initArcPath(startR: number, endR: number, padAngle = 0, cornerRadius = 0) {
-    return d3.arc()
-      .innerRadius(startR) // 内环半径
-      .outerRadius(endR)  // 外环半径
-      .padAngle(padAngle || 0) // 饼图间隔
-      .cornerRadius(cornerRadius || 0); // 饼图圆角
+  private initArcPath(pieParams: any, seriesItem: any, rise = 0) {
+    return d3
+      .arc()
+      .innerRadius(pieParams.startR) // 内环半径
+      .outerRadius(pieParams.endR + rise) // 外环半径
+      .padAngle(seriesItem.padAngle || 0) // 饼图间隔
+      .cornerRadius(seriesItem.cornerRadius || 0); // 饼图圆角
   }
 
   // 初始化饼图数据
-  private initPieData(data: any[], pieParams: any) {
-
-    return d3.pie().sort(null)
-      .value((d: any) => d.value)(data)
+  private initPieData(seriesItem: any, pieParams: any) {
+    return d3
+      .pie()
+      .sort(null)
+      .value((d: any) => d.value)(seriesItem.data)
       .map((d: any, index: number) => {
+        d.pieIndex = this.legendIndex;
+        d.index = index;
+        d.total = seriesItem.data.length;
+        d.color = this.legendColors[this.legendIndex];
         d.width = this.getTextWidth(d.data.name, 12);
-        d.id = d.data.name + index;
+        d.id = this.id + this.legendIndex;
         d.arc = d.startAngle + (d.endAngle - d.startAngle) / 2;
         d.my = -Math.cos(d.arc) * pieParams.centerR;
         d.mx = Math.sin(d.arc) * pieParams.centerR;
         d.cx = d.mx + pieParams.centerX;
         d.cy = d.my + pieParams.centerY;
-
-
-        let disArc = 0;
-        if (d.arc < Math.PI / 2) {
-          disArc = d.arc - Math.PI / 4;
-        } else if (d.arc < Math.PI && d.arc > Math.PI / 2) {
-          disArc = d.arc - Math.PI * 3 / 4;
-        } else if (d.arc > Math.PI && d.arc < Math.PI * 3 / 2) {
-          disArc = d.arc - Math.PI * 5 / 4;
-        } else if (d.arc > Math.PI * 3 / 2 && d.arc < Math.PI * 2) {
-          disArc = d.arc - Math.PI * 7 / 4;
-        }
-
-        d.labelArc = d.arc - disArc;
-        d.labelDisR = 20 / Math.cos(disArc);
+        d.arcPath = this.initArcPath(pieParams, seriesItem);
+        d.arcPathEnter = this.initArcPath(pieParams, seriesItem, this.hoverRise);
+        d.isLast = index === d.total - 1;
+        d.isInner = seriesItem.label.position === 'inner';
+        this.legendIndex++;
+        this.totalData.push(d);
         return d;
       });
   }
 
   // 添加鼠标事件
-  private addMouseEvent(nodes: any, arcPathEnter: any, arcPath: any, centerX: number, centerY: number, isInnerLabel: boolean) {
+  private addMouseEvent(nodes: any, centerX: number, centerY: number, isInnerLabel: boolean) {
     const that = this;
-    nodes.on('mouseenter', function (d: any, index: number) {
-      if (!isInnerLabel) {
-        this.parentNode.appendChild(this);
-      }
-      d3.select(this).select('.pie-path').transition().duration(300).attr('d', arcPathEnter(d));
-    }).on('mouseleave', function (d: any, index: number) {
-      if (!d.data.selected && index !== nodes.nodes().length - 1) {
-        this.parentNode.insertBefore(this, this.parentNode.childNodes[index]);
-      } else if (!d.data.selected && index === nodes.nodes().length - 1) {
-        this.parentNode.insertBefore(this, this.parentNode.childNodes[index - 1]);
-      }
+    nodes
+      .on('mouseenter', function(d: any, index: number) {
+        if (!isInnerLabel) {
+          this.parentNode.appendChild(this);
+        }
+        d3.select(this)
+          .select('.pie-path')
+          .transition()
+          .duration(300)
+          .attr('d', d.arcPathEnter(d));
+      })
+      .on('mouseleave', function(d: any, index: number) {
+        if (!d.data.selected && index !== nodes.nodes().length - 1) {
+          this.parentNode.insertBefore(this, this.parentNode.childNodes[index]);
+        } else if (!d.data.selected && index === nodes.nodes().length - 1) {
+          this.parentNode.insertBefore(this, this.parentNode.childNodes[index - 1]);
+        }
 
-      d3.select(this).select('.pie-path').transition().duration(300).attr('d', arcPath(d));
-    }).on('click', function (d: any, index: number) {
-      nodes.each((d1: any) => d1.data.selected = false);
-      d.data.selected = true;
-      const dx = Math.sin(d.arc) * that.selectedRise;
-      const dy = -Math.cos(d.arc) * that.selectedRise;
-      d3.selectAll('.pieG').transition().duration(300).attr('transform', `translate(${centerX},${centerY})`);
-      d3.select(this).transition().duration(300).attr('transform', `translate(${centerX + dx},${centerY + dy})`);
-      d3.selectAll('.pie-label-g').transition().duration(300).attr('transform', `translate(${centerX},${centerY})`);
-
-      if (!isInnerLabel) {
-        this.parentNode.appendChild(this);
-      } else {
-        const pieLabelGnodes = d3.select(this.parentNode).selectAll('.pie-label-g');
-        pieLabelGnodes.transition().duration(300).attr('transform', `translate(${centerX},${centerY})`);
-        d3.select(pieLabelGnodes.nodes()[index])
+        d3.select(this)
+          .select('.pie-path')
+          .transition()
+          .duration(300)
+          .attr('d', d.arcPath(d));
+      })
+      .on('click', function(d: any, index: number) {
+        nodes.each((d1: any) => (d1.data.selected = false));
+        d.data.selected = true;
+        const dx = Math.sin(d.arc) * that.selectedRise;
+        const dy = -Math.cos(d.arc) * that.selectedRise;
+        d3.selectAll('.pieG' + that.id)
+          .transition()
+          .duration(300)
+          .attr('transform', `translate(${centerX},${centerY})`);
+        d3.select(this)
           .transition()
           .duration(300)
           .attr('transform', `translate(${centerX + dx},${centerY + dy})`);
-      }
-    });
+        d3.selectAll('.pie-label-g' + that.id)
+          .transition()
+          .duration(300)
+          .attr('transform', `translate(${centerX},${centerY})`);
+
+        if (!isInnerLabel) {
+          this.parentNode.appendChild(this);
+        } else {
+          const pieLabelGnodes = d3.select(this.parentNode).selectAll('.pie-label-g' + that.id);
+          pieLabelGnodes
+            .transition()
+            .duration(300)
+            .attr('transform', `translate(${centerX},${centerY})`);
+          d3.select(pieLabelGnodes.nodes()[index])
+            .transition()
+            .duration(300)
+            .attr('transform', `translate(${centerX + dx},${centerY + dy})`);
+        }
+
+        that.onSelect.emit(d.data);
+      });
   }
 
-  private drawOuterLable(pieNodes: any, pieParams: any, seriesItem: any, colors: string[]) {
+  private drawOuterLable(pieNodes: any, pieParams: any, seriesItem: any) {
     const borderRadius = (seriesItem.label && seriesItem.label.borderRadius) || 3;
     const borderColor = (seriesItem.label && seriesItem.label.borderColor) || 'none';
     const height = (seriesItem.label && seriesItem.label.height) || 24;
@@ -207,24 +383,16 @@ export class SfPieComponent implements OnInit, AfterViewInit {
     const borderWidth = (seriesItem.label && seriesItem.label.borderWidth) || 1;
     const background = (seriesItem.label && seriesItem.label.background) || 'none';
 
-    this.outerLabelG = pieNodes.append('g')
-      .attr('class', 'outer-label-g');
-    this.outerLabelG.append('path')
+    this.outerLabelG = pieNodes.append('g').attr('class', 'outer-label-g');
+    this.outerLabelG
+      .append('path')
       .attr('class', 'label-point-line')
-      // .attr('d', (d: any) => {
-      //   const borderCenterX = Math.sin(d.arc) * pieParams.endR;
-      //   const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
-      //   const disX = Math.sin(d.arc) > 0 ? 1 : -1;
-      //   return `
-      //         M${borderCenterX},${borderCenterY}
-      //         L${borderCenterX + d.labelDisR * Math.sin(d.labelArc)},${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
-      //         L${borderCenterX + d.labelDisR * Math.sin(d.labelArc) + disX * 20},${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
-      //          `;
-      // })
-      .attr('stroke', '#999').attr('stroke-width', 0.5)
+      .attr('stroke', (d: any, index: number) => (!isShow ? 'none' : d.color))
+      .attr('stroke-width', 0.5)
       .attr('fill', 'none');
 
-    this.outerLabelG.append('rect')
+    this.outerLabelG
+      .append('rect')
       .attr('class', 'outer-label-rect')
       .attr('rx', borderRadius)
       .attr('ry', borderRadius)
@@ -234,38 +402,29 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       .attr('stroke-width', borderWidth)
       .attr('fill', background);
 
-    this.outerLabelG.append('text')
+    this.outerLabelG
+      .append('text')
       .attr('class', 'outer-label-text')
       .text((d: any) => d.data.name)
-      .attr('fill', (d: any, index: number) => !isShow ? 'none' : colors[index])
+      .attr('fill', (d: any, index: number) => (!isShow ? 'none' : d.color))
       .attr('dominant-baseline', 'middle')
-      .attr('text-anchor', (d: any) => Math.sin(d.arc) > 0 ? 'start' : 'end')
+      .attr('text-anchor', (d: any) => (Math.sin(d.arc) > 0 ? 'start' : 'end'))
       .style('font-size', 12)
-      .style('pointer-events', 'none')
-      .attr('transform', (d: any) => {
-        const rectW = width || d.width;
-        const borderCenterX = Math.sin(d.arc) * pieParams.endR;
-        const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
-        const disX = Math.sin(d.arc) > 0 ? 25 : - 25;
-        return `translate(
-          ${borderCenterX + d.labelDisR * Math.sin(d.labelArc) + disX},
-          ${borderCenterY - d.labelDisR * Math.cos(d.labelArc)}
-          )`;
-      });
+      .style('pointer-events', 'none');
   }
 
   // 画饼图
-  private drawPiePath(wrapNode: any, pieData: any[], seriesItem: any, pieParams: any, colors: string[]) {
+  private drawPiePath(wrapNode: any, pieData: any[], seriesItem: any, pieParams: any) {
     const isInnerLabel = seriesItem.label && seriesItem.label.position === 'inner';
     const centerX = pieParams.centerX;
     const centerY = pieParams.centerY;
-    const arcPath = this.initArcPath(pieParams.startR, pieParams.endR, seriesItem.padAngle, seriesItem.cornerRadius);
-    const arcPathEnter = this.initArcPath(pieParams.startR, pieParams.endR + this.hoverRise, seriesItem.padAngle, seriesItem.cornerRadius);
-    const pieNodes = wrapNode.selectAll('.pieG')
+
+    const pieNodes = wrapNode
+      .selectAll('.pieG' + this.id)
       .data(pieData)
       .enter()
       .append('g')
-      .attr('class', 'pieG')
+      .attr('class', 'pieG' + this.id)
       .attr('id', (d: any) => 'pieG' + d.id)
       .attr('transform', (d: any) => {
         const dx = Math.sin(d.arc) * this.selectedRise;
@@ -273,13 +432,14 @@ export class SfPieComponent implements OnInit, AfterViewInit {
         return `translate(${centerX + (d.data.selected ? dx : 0)},${centerY + (d.data.selected ? dy : 0)})`;
       });
 
-    this.addMouseEvent(pieNodes, arcPathEnter, arcPath, centerX, centerY, isInnerLabel);
+    this.addMouseEvent(pieNodes, centerX, centerY, isInnerLabel);
 
     if (!isInnerLabel) {
-      this.drawOuterLable(pieNodes, pieParams, seriesItem, colors);
+      this.drawOuterLable(pieNodes, pieParams, seriesItem);
     }
 
-    pieNodes.append('path')
+    pieNodes
+      .append('path')
       .attr('class', 'pie-path')
       .attr('fill', 'none')
       .attr('stroke', '#ffffff')
@@ -287,25 +447,20 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       .attr('style', 'cursor:pointer')
       .transition()
       .duration(500)
-      .attrTween('d', (d: any) => {
-        return (t: number) => {
-          return arcPath({
-            startAngle: d.startAngle * t,
-            endAngle: d.endAngle * t
-          });
-        };
-      }).attr('fill', (d: any, index: number) => colors[index]);
+      .attrTween('d', (d: any) => (t: number) => d.arcPath({ startAngle: d.startAngle * t, endAngle: d.endAngle * t }))
+      .attr('fill', (d: any) => d.color);
   }
 
   // 画label
-  private drawInnerLabel(wrapNode: any, pieData: any[], pieParams: any, seriesItem: any, colors: string[]) {
+  private drawInnerLabel(wrapNode: any, pieData: any[], pieParams: any, seriesItem: any) {
     const centerX = pieParams.centerX;
     const centerY = pieParams.centerY;
-    const textNodes = wrapNode.selectAll('.pie-label-g')
+    const textNodes = wrapNode
+      .selectAll('.pie-label-g' + this.id)
       .data(pieData)
       .enter()
       .append('g')
-      .attr('class', 'pie-label-g')
+      .attr('class', 'pie-label-g' + this.id)
       .attr('id', (d: any) => 'pieLabel' + d.id)
       .attr('transform', (d: any) => {
         const dx = Math.sin(d.arc) * this.selectedRise;
@@ -313,10 +468,11 @@ export class SfPieComponent implements OnInit, AfterViewInit {
         return `translate(${centerX + (d.data.selected ? dx : 0)},${centerY + (d.data.selected ? dy : 0)})`;
       });
 
-    textNodes.append('text')
+    textNodes
+      .append('text')
       .attr('class', 'pie-label')
       .text((d: any) => d.data.name)
-      .attr('fill', (d: any, index: number) => seriesItem.label && seriesItem.label.show === false ? 'none' : '#fff')
+      .attr('fill', (d: any, index: number) => (seriesItem.label && seriesItem.label.show === false ? 'none' : '#fff'))
       .attr('dominant-baseline', 'middle')
       .attr('text-anchor', 'middle')
       .style('font-size', 12)
@@ -326,23 +482,22 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
   private drawPie(data: any[]) {
     const that = this;
-    this.svg.append('g')
+    const dataIndex = 0;
+    this.svg
+      .append('g')
       .attr('class', 'main-pies-wrap')
       .selectAll('.pieGwrap')
       .data(data)
       .enter()
       .append('g')
       .attr('class', 'pieGwrap')
-      .each(function (d: any) {
+      .each(function(d: any) {
         const nodeG = d3.select(this);
-        const colors = that.option.color;
-        // const colors = d.data.map((dataItem: any, index: number) => d3.interpolateViridis(index / d.data.length));
         const pieParams = that.getPieParams(d);
-
-        const pieData = that.initPieData(d.data, pieParams);
-        that.drawPiePath(nodeG, pieData, d, pieParams, colors);
+        const pieData = that.initPieData(d, pieParams);
+        that.drawPiePath(nodeG, pieData, d, pieParams);
         if (d.label.position === 'inner') {
-          that.drawInnerLabel(nodeG, pieData, pieParams, d, colors);
+          that.drawInnerLabel(nodeG, pieData, pieParams, d);
         } else {
           that.createForceSimulation(pieData, pieParams, d);
         }
@@ -350,7 +505,6 @@ export class SfPieComponent implements OnInit, AfterViewInit {
   }
 
   private createForceSimulation(nodes: any[], pieParams: any, seriesItem: any) {
-
     const height = (seriesItem.label && seriesItem.label.height) || 24;
     const width = seriesItem.label && seriesItem.label.width;
 
@@ -362,31 +516,28 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       return Math.sin(d.arc) * (pieParams.endR + 20);
     });
 
-    const simulation = d3.forceSimulation(nodes)
+    d3.forceSimulation(nodes)
       .force('link', forceLink)
       .force('x', forceX)
       .force('y', forceY)
       .on('tick', () => {
-        this.outerLabelG.selectAll('.label-point-line')
-          .attr('d', (d: any) => {
-            const borderCenterX = Math.sin(d.arc) * pieParams.endR;
-            const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
-            const disX = Math.sin(d.arc) > 0 ? 1 : -1;
-            return `M${borderCenterX},${borderCenterY} L${d.x},${d.y} L${d.x + disX * 20},${d.y}`;
-          });
+        this.outerLabelG.selectAll('.label-point-line').attr('d', (d: any) => {
+          const borderCenterX = Math.sin(d.arc) * pieParams.endR;
+          const borderCenterY = -Math.cos(d.arc) * pieParams.endR;
+          const disX = Math.sin(d.arc) > 0 ? 1 : -1;
+          return `M${borderCenterX},${borderCenterY} L${d.x},${d.y} L${d.x + disX * 20},${d.y}`;
+        });
 
-        this.outerLabelG.selectAll('.outer-label-rect')
-          .attr('transform', (d: any) => {
-            const rectW = width || d.width;
-            const disX = Math.sin(d.arc) > 0 ? 20 : - rectW - 20;
-            return `translate(${d.x + disX},${d.y - height / 2 - 1})`;
-          });
+        this.outerLabelG.selectAll('.outer-label-rect').attr('transform', (d: any) => {
+          const rectW = width || d.width;
+          const disX = Math.sin(d.arc) > 0 ? 20 : -rectW - 20;
+          return `translate(${d.x + disX},${d.y - height / 2 - 1})`;
+        });
 
-        this.outerLabelG.selectAll('.outer-label-text')
-          .attr('transform', (d: any) => {
-            const disX = Math.sin(d.arc) > 0 ? 25 : - 25;
-            return `translate(${d.x + disX},${d.y})`;
-          });
+        this.outerLabelG.selectAll('.outer-label-text').attr('transform', (d: any) => {
+          const disX = Math.sin(d.arc) > 0 ? 25 : -25;
+          return `translate(${d.x + disX},${d.y})`;
+        });
       });
   }
 
@@ -402,7 +553,9 @@ export class SfPieComponent implements OnInit, AfterViewInit {
   }
 
   private getTextWidth(str: string, fontSize = 14) {
-    const span = d3.select('body').append('span')
+    const span = d3
+      .select('body')
+      .append('span')
       .style('display', 'inline-block')
       .style('font-size', fontSize + 'px')
       .text(str);
@@ -410,5 +563,4 @@ export class SfPieComponent implements OnInit, AfterViewInit {
     span.remove();
     return spanWidth;
   }
-
 }
