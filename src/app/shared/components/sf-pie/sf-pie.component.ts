@@ -6,8 +6,8 @@ import * as d3 from 'd3';
   templateUrl: './sf-pie.component.html',
   styleUrls: ['./sf-pie.component.scss']
 })
-export class SfPieComponent implements OnInit, AfterViewInit {
-  @Input() public option: any = {};
+export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
+  @Input() public option: any;
 
   @Output() public onSelect = new EventEmitter<any>();
 
@@ -15,7 +15,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
   private isLoaded = false;
 
-  private id: string;
+  private id = '';
 
   private svgW = 0;
 
@@ -43,16 +43,23 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
   private totalData: any[] = [];
 
-  constructor() {}
+  constructor() { }
 
   public ngOnChanges(changes: SimpleChanges) {
-    if (changes.hasOwnProperty('option')) {
-      this.initPie(false);
+    if (changes.hasOwnProperty('option') && this.option && this.option.id) {
+      this.id = this.option && this.option.id ? this.option.id + new Date().getTime() : new Date().getTime();
+
+      console.log(this.id);
+
+      const timeout = setTimeout(() => {
+        this.initPie(false);
+        clearTimeout(timeout);
+      }, 500);
+
     }
   }
 
   public ngOnInit() {
-    this.id = this.option.id + new Date().getTime();
     const pieIntance: any = {
       initPie: this.initPie.bind(this)
     };
@@ -60,8 +67,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
   }
 
   public ngAfterViewInit() {
-    this.initPie(true);
-    this.isLoaded = true;
+    // this.initPie(true);
   }
 
   private resetParams() {
@@ -81,20 +87,23 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       }
       this.svgW = Number.parseFloat(wrapDom.style('width'));
       this.svgH = Number.parseFloat(wrapDom.style('height'));
+      console.log(this.svgW, this.svgH);
+
       this.initSvg(wrapDom);
-      this.legendColors = this.option.color || this.option.legend.data.map((dataItem: any, index: number) => d3.interpolateViridis(index / this.option.legend.data.length));
+      this.legendColors = this.option.color
+        || this.option.legend.data.map((dataItem: any, index: number) => d3.interpolateViridis(index / this.option.legend.data.length));
       this.drawPie(this.option.series);
       this.initLegend(this.option.legend);
     }
+    this.isLoaded = true;
   }
 
   private legendItem(legendWrap: any, data: any[]) {
-    const that = this;
     const legendItemWrap = legendWrap
       .append('g')
       .attr('class', 'legend-item-wrap')
       .attr('id', 'legendItemWrap' + this.id)
-      .attr('transform', `translate(0, 14)`);
+      .attr('transform', `translate(5, 14)`);
 
     const legendGnodes = legendItemWrap
       .selectAll('.legend-item-g')
@@ -104,13 +113,14 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       .attr('class', 'legend-item-g')
       .style('cursor', 'pointer')
       .attr('transform', (d: any, i: number) => {
-        return `translate(${d.left},${this.svgH - 40})`;
+        return `translate(${d.left},0)`;
       })
-      .on('mouseenter', function(d: any, index: number) {
-        const pieNode = d3.select('#pieG' + that.id + index);
-        const pieData = that.totalData[index];
+      .on('mouseenter', (d: any, index: number) => {
+        const pieNode = d3.select('#pieG' + this.id + index);
+        const pieData = this.totalData[index];
         if (!pieData.isInner) {
-          pieNode.node().parentNode.appendChild(pieNode.node());
+          const pieDom: any = pieNode.node();
+          pieDom.parentNode.appendChild(pieNode.node());
         }
         const arcPathEnter = pieData.arcPathEnter;
         pieNode
@@ -119,21 +129,21 @@ export class SfPieComponent implements OnInit, AfterViewInit {
           .duration(300)
           .attr('d', arcPathEnter(pieData));
       })
-      .on('mouseleave', function(d: any, index: number) {
-        const pieSelection = d3.select('#pieG' + that.id + index);
-        const pieNode = pieSelection.node();
-        const pieData = that.totalData[index];
+      .on('mouseleave', (d: any, index: number) => {
+        const pieSelection = d3.select('#pieG' + this.id + index);
+        const pieNode: any = pieSelection.node();
+        const pieData = this.totalData[index];
         if (!pieData.data.selected && !d.isLast) {
           pieNode.parentNode.insertBefore(pieNode, pieNode.parentNode.childNodes[pieData.index]);
         } else if (!pieData.data.selected && d.isLast) {
           pieNode.parentNode.insertBefore(pieNode, pieNode.parentNode.childNodes[pieData.index - 1]);
         }
-        const arcPath = that.totalData[index].arcPath;
+        const arcPath = this.totalData[index].arcPath;
         pieSelection
           .select('.pie-path')
           .transition()
           .duration(300)
-          .attr('d', arcPath(that.totalData[index]));
+          .attr('d', arcPath(this.totalData[index]));
       });
 
     legendGnodes
@@ -146,7 +156,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
     legendGnodes
       .append('text')
-      .text(d => d.value)
+      .text((d: any) => d.value)
       .attr('fill', (d: any, i: number) => this.legendColors[i])
       .attr('dominant-baseline', 'middle')
       .attr('text-anchor', 'start')
@@ -191,7 +201,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
     const legendSwitchBtn = legendWrap
       .append('g')
       .attr('class', 'legend-switch-btn')
-      .attr('transform', `translate(${this.svgW - 66},${this.svgH - 40})`);
+      .attr('transform', `translate(${this.svgW - 66},0)`);
 
     legendSwitchBtn
       .append('rect')
@@ -242,17 +252,21 @@ export class SfPieComponent implements OnInit, AfterViewInit {
 
   private initLegend(legend: any) {
     const data = legend.data.map((item: string) => ({ value: item, left: 0, right: 0 }));
-    data.reduce((positionX: number, item) => {
+    data.reduce((positionX: number, item: any) => {
       item.left = positionX;
       item.right = positionX + this.getTextWidth(item.value, 12) + 24;
       return item.right;
     }, 0);
 
-    const legendWrap = this.svg.append('g').attr('class', 'legend-wrap-g');
+    const legendWrap = this.svg.append('g')
+      .attr('class', 'legend-wrap-g')
+      .attr('transform', `translate(${0},${this.svgH - legend.bottom})`);
 
     this.legendItem(legendWrap, data);
 
-    this.drawSwitchBtn(legendWrap, data);
+    if (data[data.length - 1].right > this.svgW - 10) {
+      this.drawSwitchBtn(legendWrap, data);
+    }
   }
 
   private initSvg(dom: any) {
@@ -315,7 +329,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
   private addMouseEvent(nodes: any, centerX: number, centerY: number, isInnerLabel: boolean) {
     const that = this;
     nodes
-      .on('mouseenter', function(d: any, index: number) {
+      .on('mouseenter', function (d: any, index: number) {
         if (!isInnerLabel) {
           this.parentNode.appendChild(this);
         }
@@ -325,7 +339,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
           .duration(300)
           .attr('d', d.arcPathEnter(d));
       })
-      .on('mouseleave', function(d: any, index: number) {
+      .on('mouseleave', function (d: any, index: number) {
         if (!d.data.selected && index !== nodes.nodes().length - 1) {
           this.parentNode.insertBefore(this, this.parentNode.childNodes[index]);
         } else if (!d.data.selected && index === nodes.nodes().length - 1) {
@@ -338,7 +352,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
           .duration(300)
           .attr('d', d.arcPath(d));
       })
-      .on('click', function(d: any, index: number) {
+      .on('click', function (d: any, index: number) {
         nodes.each((d1: any) => (d1.data.selected = false));
         d.data.selected = true;
         const dx = Math.sin(d.arc) * that.selectedRise;
@@ -388,7 +402,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       .append('path')
       .attr('class', 'label-point-line')
       .attr('stroke', (d: any, index: number) => (!isShow ? 'none' : d.color))
-      .attr('stroke-width', 0.5)
+      .attr('stroke-width', 1)
       .attr('fill', 'none');
 
     this.outerLabelG
@@ -491,7 +505,7 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       .enter()
       .append('g')
       .attr('class', 'pieGwrap')
-      .each(function(d: any) {
+      .each(function (d: any) {
         const nodeG = d3.select(this);
         const pieParams = that.getPieParams(d);
         const pieData = that.initPieData(d, pieParams);
@@ -504,20 +518,92 @@ export class SfPieComponent implements OnInit, AfterViewInit {
       });
   }
 
+  private getY(d: any, pieParams: any) {
+    return d.tarY || - Math.cos(d.arc) * (pieParams.endR + 20);
+  }
+
+  private getX(d: any, pieParams: any) {
+    return Math.sin(d.arc) * (pieParams.endR + 20);
+  }
+
   private createForceSimulation(nodes: any[], pieParams: any, seriesItem: any) {
     const height = (seriesItem.label && seriesItem.label.height) || 24;
     const width = seriesItem.label && seriesItem.label.width;
+    const dy = 14;
+    // const forceLink = d3.forceCollide(10);
+    const forceY = d3.forceY((d: any, index) => {
+      let disY = 0;
+      let y = this.getY(d, pieParams);
+      let tarY = y;
+      let preY = 0;
+      if (index !== 0) {
+        // console.log(nodes[index - 1].y, d.y);
+        preY = this.getY(nodes[index - 1], pieParams);
+        disY = y - preY;
 
-    const forceLink = d3.forceCollide(10);
-    const forceY = d3.forceY((d: any) => {
-      return -Math.cos(d.arc) * (pieParams.endR + 20);
+        const preArc = nodes[index - 1].arc;
+        const curArc = d.arc;
+        if (preArc < Math.PI && curArc > Math.PI) {
+          preY = - Math.cos(d.arc) * (pieParams.endR + 20);
+        }
+
+        if (d.arc < Math.PI) {
+          if (disY < 0) {
+            y = preY;
+            disY = 0;
+          }
+          if (Math.abs(disY) < 14) {
+            tarY = y + 14 - Math.abs(disY);
+          }
+        } else if (d.arc >= Math.PI) {
+          if (disY > 0) {
+            y = preY;
+            disY = 0;
+          }
+          if (Math.abs(disY) < 14) {
+            tarY = y - 14 + Math.abs(disY);
+          }
+        }
+      }
+      // console.log(d.tarY, index);
+
+      d.tarY = tarY;
+
+      return tarY;
     });
-    const forceX = d3.forceX((d: any) => {
-      return Math.sin(d.arc) * (pieParams.endR + 20);
+    const forceX = d3.forceX((d: any, index) => {
+      let disY = 0;
+      const y = this.getY(d, pieParams);
+      let tarY = y;
+      let preY = 0;
+
+      const x = this.getX(d, pieParams);
+      let tarX = x;
+      let preX = 0;
+      if (index !== 0) {
+        // console.log(nodes[index - 1].y, d.y);
+        preX = this.getX(nodes[index - 1], pieParams);
+        preY = this.getY(nodes[index - 1], pieParams);
+        disY = y - preY;
+        tarY = Math.abs(disY) < 14 ? y + disY : y;
+
+        if (Math.abs(disY) < 14 && d.arc < Math.PI) {
+          const dTarX = Math.pow(preX, 2) - 2 * dy * preY + Math.pow(dy, 2);
+          if (dTarX >= 0) {
+            tarX = Math.sqrt(dTarX);
+          }
+        } else if (Math.abs(disY) < 14 && d.arc > Math.PI) {
+          const dTarX = Math.pow(preX, 2) + 2 * dy * preY + Math.pow(dy, 2);
+          if (dTarX >= 0) {
+            tarX = -Math.sqrt(dTarX);
+          }
+        }
+      }
+      return tarX;
     });
 
     d3.forceSimulation(nodes)
-      .force('link', forceLink)
+      // .force('link', forceLink)
       .force('x', forceX)
       .force('y', forceY)
       .on('tick', () => {
