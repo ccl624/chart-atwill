@@ -401,45 +401,54 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
   }
 
   private drawMapMarker(gNodes: any) {
+    const markerH = 36;
     if (!this.showMarker) {
       return false;
     }
     this.markerG = gNodes.append('g')
       .attr('class', 'markG data-shape-child')
       .attr('cursor', 'pointer')
-      .attr('transform', `translate(${-3},${-40}) scale(0.8, 1)`)
-      .style('display', (d: any) => d.height ? 'block' : 'none');
+      .attr('transform', `translate(${-3},${-16 - 48}) scale(0.8, 1)`)
+      .style('display', 'none');
 
     this.markerG.append('rect')
       .attr('class', 'text-wrap')
-      .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
-      .attr('width', (d: any) => d.value ? this.getTextWidth(d.value.toFixed(2)) : 0)
-      .attr('height', '24')
+      .attr('x', (d: any) => -this.getTextWidth('访问量：' + d.value.toFixed(2)) / 2)
+      .attr('width', (d: any) => d.value ? this.getTextWidth('访问量：' + d.value.toFixed(2)) : 0)
+      .attr('height', markerH)
       .attr('fill', 'url(#china_marker_color)')
-      .attr('y', '-13')
+      .attr('y', -(markerH + 2) / 2)
       .attr('transform', `translate(5,0)`);
 
     this.markerG.append('text')
-      .attr('class', 'marker-text')
+      .attr('class', 'marker-text-name')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .attr('fill', '#cec396')
-      .attr('transform', `translate(5,0)`)
+      .attr('transform', `translate(5,${-markerH / 4})`)
+      .text((d: any) => d.properties.name);
+
+    this.markerG.append('text')
+      .attr('class', 'marker-text-num')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', '#cec396')
+      .attr('transform', `translate(5,${markerH / 4})`)
       .transition(this.transition)
       .delay((d: any, i: number) => d.height ? i * this.preDuration : 0)
-      .textTween((d: any) => (t: number) => t * d.value ? (t * d.value).toFixed(2) : '');
+      .textTween((d: any) => (t: number) => t * d.value ? '访问量：' + (t * d.value).toFixed(2) : '');
 
     this.markerG.append('path')
       .attr('class', 'arrow-icon')
       .attr('d', (d: any) => {
         const c = 0;
-        const dh = 12 + 3;
+        const dh = markerH / 2 + 3;
         return `M${c},${dh} L${c + 4},${dh} L${c},${dh + 8}, L${c - 4},${dh} Z`;
       })
       .attr('fill', (d: any) => d.height ? '#aedcff' : 'none')
       .attr('transform', `translate(5,0)`);
 
-    this.drawMarkFrame(this.markerG);
+    this.drawMarkFrame(this.markerG, markerH);
 
     this.markerG.transition(this.transition)
       .delay((d: any, i: number) => d.height ? i * this.preDuration : 0)
@@ -455,17 +464,17 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
       });
   }
 
-  private drawMarkFrame(markG: any) {
+  private drawMarkFrame(markG: any, markerH: number) {
     const frameGNode = markG.append('g')
       .attr('class', 'frame-g');
 
-    const frameDh = 14;
+    const frameDh = markerH / 2;
     const frameW = 6;
 
     frameGNode.append('path')
       .attr('class', 'marker-frame marker-frame-left-top')
       .attr('d', (d: any) => {
-        const c = -this.getTextWidth(d.value.toFixed(2)) / 2;
+        const c = -this.getTextWidth('访问量：' + d.value.toFixed(2)) / 2;
         const dh = -frameDh;
         return `M${c + frameW},${dh} L${c},${dh}`;
       })
@@ -475,7 +484,7 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
     frameGNode.append('path')
       .attr('class', 'marker-frame marker-frame-right-top')
       .attr('d', (d: any) => {
-        const c = this.getTextWidth(d.value.toFixed(2)) / 2 + frameW;
+        const c = this.getTextWidth('访问量：' + d.value.toFixed(2)) / 2 + frameW;
         const dh = -frameDh;
         return `M${c},${dh} L${c + frameW},${dh}`;
       })
@@ -485,7 +494,7 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
     frameGNode.append('path')
       .attr('class', 'marker-frame marker-frame-left-bottom')
       .attr('d', (d: any) => {
-        const c = -this.getTextWidth(d.value.toFixed(2)) / 2;
+        const c = -this.getTextWidth('访问量：' + d.value.toFixed(2)) / 2;
         const dh = frameDh - 1;
         return `M${c + frameW},${dh} L${c},${dh}`;
       })
@@ -495,7 +504,7 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
     frameGNode.append('path')
       .attr('class', 'marker-frame marker-frame-right-bottom')
       .attr('d', (d: any) => {
-        const c = this.getTextWidth(d.value.toFixed(2)) / 2 + frameW;
+        const c = this.getTextWidth('访问量：' + d.value.toFixed(2)) / 2 + frameW;
         const dh = frameDh - 1;
         return `M${c},${dh} L${c + frameW},${dh}`;
       })
@@ -545,15 +554,14 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
   }
 
   private updateMarker(markerG: any) {
-    markerG.style('display', (d: any) => (d.height ? 'block' : 'none'))
-      .selectAll('.text-wrap')
-      .attr('x', (d: any) => -this.getTextWidth(d.value.toFixed(2)) / 2)
+    markerG.selectAll('.text-wrap')
+      .attr('x', (d: any) => -this.getTextWidth('访问量：' + d.value.toFixed(2)) / 2)
       .transition(this.transition)
-      .attr('width', (d: any) => d.value ? this.getTextWidth(d.value.toFixed(2)) : 0);
+      .attr('width', (d: any) => d.value ? this.getTextWidth('访问量：' + d.value.toFixed(2)) : 0);
 
-    markerG.selectAll('.marker-text')
+    markerG.selectAll('.marker-text-num')
       .transition(this.transition)
-      .textTween((d: any) => (t: number) => t * d.value ? (t * d.value).toFixed(2) : '');
+      .textTween((d: any) => (t: number) =>  t * d.value ? '访问量：' + (t * d.value).toFixed(2) : '');
     // markerG.selectAll('.arrow-icon').attr('fill', (d: any) => d.value ? '#aedcff' : 'none');
     markerG.selectAll('.marker-frame').attr('stroke-width', (d: any) => d.value ? 2 : 0);
     markerG.transition(this.transition)
@@ -593,10 +601,13 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
   private mapMouseEvent(node: any) {
     const that = this;
     node.on('mouseout', function () {
+      d3.select(this).select('.markG').style('display', 'none');
       that.activeNodes(d3.select(this), false);
     }).on('mouseover', function (d: any, index: number) {
       that.activeNodes(d3.select(this), true);
       that.svg.selectAll('.china-map').sort((a: any, b: any) => a.properties.name === d.properties.name ? 1 : -1);
+      d3.select(this).select('.markG').style('display', d.height ? 'block' : 'none');
+      //(d: any) => d.height ? 'block' : 'none'
     });
   }
 
