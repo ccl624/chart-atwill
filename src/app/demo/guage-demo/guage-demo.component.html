@@ -1,0 +1,29 @@
+<demo-container>
+
+  <guage-chart class="demo-show"></guage-chart>
+
+  <div class="demo-info">
+    <h2>仪表盘 Gauge</h2>
+    <div>
+      <section>
+        <h3>介绍</h3>
+        <p>{{introduce}}</p>
+      </section>
+      <section>
+        <h3>引入</h3>
+        <p class="code">{{htmlStr}}</p>
+      </section>
+      <section>
+        <h3>Option</h3>
+        <ul>
+          <li *ngFor="let param of params">
+            <span class="parameter">{{param?.parameter}}</span> -- <span
+              class="explanation">{{param?.explanation}}</span>
+          </li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+</demo-container>

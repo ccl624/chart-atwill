@@ -1,0 +1,264 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-bar3D-demo',
+  templateUrl: './bar3D-demo.component.html',
+  styleUrls: ['./bar3D-demo.component.scss']
+})
+export class Bar3DDemoComponent implements OnInit {
+
+  public option: any;
+
+  constructor() { }
+
+  public ngOnInit() {
+    this.option = {
+      theme: 'SquarePillars',
+      chartId: 'workTime1',
+      title: {
+        show: true,
+        text: '20天工作时长变化趋势 ',
+        textAlign: 'center',
+        left: '50%'
+      },
+      legend: {
+        show: false,
+        data: [
+          {
+            name: '机器1工作时长',
+            color1: 'linear-gradient(#a16cd9, #1ac1f1)',
+          },
+          {
+            name: '机器2工作时长',
+            color1: 'linear-gradient(#fe4183, #fcb967)',
+          }
+        ]
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+          type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+        },
+        backgroundColor: '#fca156',
+        formatter: (params: any) => {
+          const colors = ['#2e84fa', '#4bd2e3', '#facb65', '#f04b49'];
+          const units = ['h', 'h', '%', '%'];
+          return params.reduce((sum: string, param: any, index: number) => {
+            return sum + `
+                  <div style="display:flex;align-items:center;">
+                      <i style="
+                          margin-right: 5px;
+                          width:8px;
+                          height:8px;
+                          border-radius:50%;
+                          background:${this.option.legend.data[index].color1}"
+                      ></i>
+                      <span>${param.seriesName}: ${param.value}${units[index]}</span>
+                  </div>
+              `;
+          }, `<div>${params[0].axisName}: ${params[0].axisValue}</div>`);
+        }
+      },
+      grid: [
+        {
+          top: 50,
+          left: 70,
+          right: 70,
+          bottom: 40
+        }
+      ],
+      xAxis3D: [
+        {
+          type: 'category',
+          name: '日期',
+          gridIndex: 0,
+          axisTick: { show: false },
+          data: [],
+          axisLine: {
+            show: false,
+          },
+          splitLine: {
+            show: false
+          },
+          axisLabel: {
+            color: '#333f4c'
+          },
+        }
+      ],
+      yAxis3D: [
+        {
+          type: 'value',
+          name: '时长（h）',
+          axisLabel: {
+            show: true,
+            color: '#8391a1'
+          },
+          splitLine: {
+            show: true,
+            color: '#eee'
+          },
+          axisLine: {
+            show: true,
+            color: '#eee'
+          },
+          axisTick: {
+            show: true,
+            color: '#eee',
+            num: 4,
+          },
+          axisName: {
+            show: true,
+            color: '#333f4c'
+          },
+          axisBottom: {
+            show: true,
+            color: '#eaebec',
+            borderColor: '#eee'
+          }
+        }
+      ],
+      series: [
+        {
+          name: '机器1工作时长',
+          type: 'bar3D',
+          stack: '总量',
+          barMaxWidth: 25,
+          gridIndex: 0,
+          itemStyle: {
+            color: 'rgba(64,247,223, 0.9)',
+            topColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#2ff6de' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#25dcc8' // 100% 处的颜色
+              }],
+            },
+            bottomColor: 'rgba(20,188,168, 0.5)',
+            frontColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#2ef7e0' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#1eccb8' // 100% 处的颜色
+              }],
+            },
+            rightColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#24dec8' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#19b9a6' // 100% 处的颜色
+              }],
+            },
+          },
+          data: [],
+          symbol: {
+            show: true
+          }
+        },
+        {
+          name: '机器2工作时长',
+          type: 'bar3D',
+          stack: '总量',
+          // barWidth: 25,
+          barMaxWidth: 25,
+          // barWidth: 40,
+          itemStyle: {
+            color: 'rgba(248,66,133, 0.9)',
+            topColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#fcaac8' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#fb87b2' // 100% 处的颜色
+              }],
+            },
+            bottomColor: 'rgba(229,57,120, 0.5)',
+            frontColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#fba0c2' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#f83e83' // 100% 处的颜色
+              }],
+            },
+            rightColor: {
+              type: 'linear',
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#f987b1' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#e3407d' // 100% 处的颜色
+              }],
+            },
+          },
+          data: [],
+          symbol: {
+            show: true
+          }
+        }
+      ]
+    };
+
+    const curDay = new Date().getTime();
+    for (let index = 0; index < 20; index++) {
+      const date = this.formatDate(curDay + index * 1000 * 60 * 60 * 24, 'yyyy-MM-dd');
+      const dataItem = Math.random() * 100;
+      const dataItem2 = Math.random() * 60 + 10;
+      this.option.xAxis3D[0].data.push(date);
+      this.option.series[0].data.push(dataItem.toFixed(2));
+      this.option.series[1].data.push(dataItem2.toFixed(2));
+    }
+
+    console.log(this.option);
+
+  }
+
+  private formatDate(date: any, fmt = 'yyyy-MM-dd HH:mm:ss') {
+    const tarDate = new Date(date);
+    const o = {
+      'M+': tarDate.getMonth() + 1, // 月份
+      'd+': tarDate.getDate(), // 日
+      'h+': tarDate.getHours(), // 小时
+      'm+': tarDate.getMinutes(), // 分
+      's+': tarDate.getSeconds(), // 秒
+      'q+': Math.floor((tarDate.getMonth() + 3) / 3), // 季度
+      S: tarDate.getMilliseconds() // 毫秒
+    };
+    if (/(y+)/.test(fmt)) {
+      fmt = fmt.replace(RegExp.$1, (tarDate.getFullYear() + '').substr(4 - RegExp.$1.length));
+    }
+    for (const k in o) {
+      if (new RegExp('(' + k + ')').test(fmt)) {
+        fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)));
+      }
+    }
+
+    return fmt;
+  }
+
+}

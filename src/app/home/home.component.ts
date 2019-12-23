@@ -14,8 +14,12 @@ export class HomeComponent implements OnInit, AfterViewInit {
   public cardH = 0;
 
   public cardList: any[] = [
-    { name: '中国地图', link: '/d3-geo', src: 'assets/image/china_map.png' },
-    { name: '仪表盘', link: '/guage', src: 'assets/image/guage.png' }
+    { name: '折线图', link: '/line-demo', src: 'assets/image/line-demo.png' },
+    { name: '柱状图', link: '/bar-demo', src: 'assets/image/bar-demo.png' },
+    { name: '柱状图3D', link: '/bar3D-demo', src: 'assets/image/bar3D-demo.png' },
+    { name: '饼图', link: '/pie-demo', src: 'assets/image/pie-demo.png' },
+    { name: '仪表盘', link: '/guage-demo', src: 'assets/image/guage.png' },
+    { name: '中国地图', link: '/china-map', src: 'assets/image/china_map.png' },
   ];
 
   constructor() { }
@@ -34,7 +38,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   private resetCardSize() {
-
     const cardLsitP = this.cardListElement.nativeElement.getBoundingClientRect();
     const cardListW = cardLsitP.width;
 

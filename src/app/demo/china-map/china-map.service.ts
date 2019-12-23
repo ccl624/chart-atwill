@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 
-export class D3GeoService {
+export class ChinaMapService {
   constructor(
     private http: HttpClient,
   ) { }
