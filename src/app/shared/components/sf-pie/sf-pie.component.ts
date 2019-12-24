@@ -42,6 +42,8 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
 
   private totalData: any[] = [];
 
+  private isEdge = false;
+
   constructor() { }
 
   public ngOnChanges(changes: SimpleChanges) {
@@ -51,6 +53,9 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   public ngOnInit() {
+    const userAgent = navigator.userAgent; // 取得浏览器的userAgent字符串
+    this.isEdge = userAgent.indexOf('Edge') > -1;
+
     const pieIntance: any = {
       initPie: this.initPie.bind(this)
     };
@@ -60,7 +65,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
   public ngAfterViewInit() {
     fromEvent(window, 'resize').subscribe((e: MouseEvent) => {
       window.requestAnimationFrame(() => {
-        this.initPie();
+        this.initPie(false);
       });
     });
   }
@@ -72,7 +77,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
     this.legendIndex = 0;
   }
 
-  private initPie() {
+  private initPie(isFirstLoad = true) {
     if (this.option && this.option.legend) {
       const windowW: number = window.document.body.clientWidth;
       const legendBottom: number = windowW < 1366 ? 48 : 55;
@@ -88,11 +93,11 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
     this.svgH = Number.parseFloat(wrapDom.style('height'));
 
     this.initSvg(wrapDom);
-    this.drawTitle();
     this.legendColors = this.option.color
       || this.option.legend.data.map((dataItem: any, index: number) => d3.interpolateViridis(index / this.option.legend.data.length));
     this.drawPie(this.option.series);
     this.initLegend(this.option.legend);
+    this.drawTitle();
   }
 
   private drawTitle() {
@@ -101,6 +106,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       const centerTextG = this.svg.append('g')
         .attr('id', 'centerTextG' + this.id)
         .attr('class', 'center-text-g')
+        .style('pointer-events', 'none')
         .attr('transform', () => {
           if (title.position) {
             const centerX = this.setRatio(title.position[0]) * this.svgW;
@@ -116,7 +122,8 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
         .style('font-size', '32px')
         .style('font-weight', '600')
         .attr('dominant-baseline', 'middle')
-        .attr('text-anchor', 'middle');
+        .attr('text-anchor', 'middle')
+        .attr('transform', `translate(0,${this.isEdge ? 16 : 0})`);
     }
 
   }
@@ -184,7 +191,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       .attr('dominant-baseline', 'middle')
       .attr('text-anchor', 'start')
       .style('font-size', '12px')
-      .attr('transform', `translate(${27},7)`);
+      .attr('transform', `translate(${27},${this.isEdge ? 11 : 7})`); // 7 11
   }
 
   private activeBth(legendSwitchBtn: any, pageTotal: number) {
@@ -270,7 +277,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       .style('font-size', '12px')
       .attr('dominant-baseline', 'middle')
       .attr('text-anchor', 'middle')
-      .attr('transform', `translate(${33},21)`);
+      .attr('transform', `translate(${33},${this.isEdge ? 24 : 21})`);
   }
 
   private initLegend(legend: any) {
@@ -424,13 +431,8 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       .on('mousemove', (d: any) => {
         const event = d3.event;
         const tootip = d3.select(`#tooltip${this.id}`);
-        tootip.style('opacity', '1').text(`${d.data.name}：${d.data.value}`);
-        const tooltipW = Number.parseFloat(tootip.style('width'));
-        const tooltipH = Number.parseFloat(tootip.style('height'));
-        tootip
-          .style('top', (event.offsetY + tooltipH + 20 > this.svgH ? this.svgH - tooltipH : event.offsetY + 20) + 'px')
-          .style('left', (event.offsetX + tooltipW + 20 > this.svgW ? this.svgW - tooltipW : event.offsetX + 20) + 'px');
 
+        tootip.text(`${d.data.name}：${d.data.value}`);
         if (
           this.option
           && this.option.tooltip
@@ -439,6 +441,25 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
         ) {
           tootip.html(this.option.tooltip.formatter(d.data));
         }
+        tootip.style('font-size', '12px')
+          .style('white-space', 'nowrap')
+          .style('opacity', '1'); // font-size:12px;white-space:nowrap;opacity:1
+        let x = event.clientX;
+        let y = event.clientY;
+        const totalW = window.innerWidth;
+        const totalH = window.innerHeight;
+        const tootipW = Number.parseFloat(tootip.style('width'));
+        const tootipH = Number.parseFloat(tootip.style('height'));
+
+        if (x + tootipW + 20 > totalW) {
+          x = totalW - tootipW - 20;
+        }
+
+        if (y + tootipH + 20 > totalH) {
+          y = totalH - tootipH - 20;
+        }
+
+        tootip.style('top', `${y + 20}px`).style('left', `${x + 20}px`); // top:${y + 20}px;left:${x + 20}px;
       });
   }
 
@@ -477,8 +498,9 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       .attr('fill', (d: any, index: number) => (!isShow ? 'none' : d.color))
       .attr('dominant-baseline', 'middle')
       .attr('text-anchor', (d: any) => (Math.sin(d.arc) > 0 ? 'start' : 'end'))
-      .style('font-size', 12)
-      .style('pointer-events', 'none');
+      .style('font-size', '12px')
+      .style('pointer-events', 'none')
+      .attr('y', this.isEdge ? 4 : 0);  // 0 4
   }
 
   // 画饼图
@@ -699,7 +721,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       .style('display', 'inline-block')
       .style('font-size', fontSize + 'px')
       .text(str);
-    const spanWidth = Number.parseFloat(span.style('width')) + 10;
+    const spanWidth = Number.parseFloat(span.style('width')) + 10; // 10
     span.remove();
     return spanWidth;
   }
