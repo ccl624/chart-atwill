@@ -60,7 +60,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
   public ngAfterViewInit() {
     fromEvent(window, 'resize').subscribe((e: MouseEvent) => {
       window.requestAnimationFrame(() => {
-        this.initPie(false);
+        this.initPie();
       });
     });
   }
@@ -72,7 +72,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
     this.legendIndex = 0;
   }
 
-  private initPie(isFirstLoad = true) {
+  private initPie() {
     if (this.option && this.option.legend) {
       const windowW: number = window.document.body.clientWidth;
       const legendBottom: number = windowW < 1366 ? 48 : 55;
