@@ -1,5 +1,8 @@
 import { Component, OnInit, Input, Output, AfterViewInit, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
 import * as d3 from 'd3';
+import { fromEvent } from 'rxjs';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'sf-pie',
@@ -9,11 +12,11 @@ import * as d3 from 'd3';
 export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() public option: any;
 
-  @Output() public onSelect = new EventEmitter<any>();
+  @Output() public OnSelect = new EventEmitter<any>();
 
-  @Output() public onPieInit = new EventEmitter<any>();
+  @Output() public OnPieInit = new EventEmitter<any>();
 
-  private isLoaded = false;
+  public subjet: Subject<string> = new Subject<string>();
 
   private id = '';
 
@@ -22,8 +25,6 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
   private svgH = 0;
 
   private svg: any;
-
-  private selection: any[];
 
   private selectedRise = 8;
 
@@ -39,8 +40,6 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
 
   private legendIndex = 0;
 
-  private pieIndex = 0;
-
   private totalData: any[] = [];
 
   constructor() { }
@@ -48,14 +47,6 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
   public ngOnChanges(changes: SimpleChanges) {
     if (changes.hasOwnProperty('option') && this.option && this.option.id) {
       this.id = this.option && this.option.id ? this.option.id + new Date().getTime() : new Date().getTime();
-
-      console.log(this.id);
-
-      const timeout = setTimeout(() => {
-        this.initPie(false);
-        clearTimeout(timeout);
-      }, 500);
-
     }
   }
 
@@ -63,11 +54,15 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
     const pieIntance: any = {
       initPie: this.initPie.bind(this)
     };
-    this.onPieInit.emit(pieIntance);
+    this.OnPieInit.emit(pieIntance);
   }
 
   public ngAfterViewInit() {
-    // this.initPie(true);
+    fromEvent(window, 'resize').subscribe((e: MouseEvent) => {
+      window.requestAnimationFrame(() => {
+        this.initPie(false);
+      });
+    });
   }
 
   private resetParams() {
@@ -78,24 +73,52 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   private initPie(isFirstLoad = true) {
-    this.resetParams();
-    if (this.isLoaded || isFirstLoad) {
-      const wrapDom = d3.select('#' + this.id);
-      const hasSvg = wrapDom.select('svg');
-      if (hasSvg) {
-        hasSvg.remove();
-      }
-      this.svgW = Number.parseFloat(wrapDom.style('width'));
-      this.svgH = Number.parseFloat(wrapDom.style('height'));
-      console.log(this.svgW, this.svgH);
-
-      this.initSvg(wrapDom);
-      this.legendColors = this.option.color
-        || this.option.legend.data.map((dataItem: any, index: number) => d3.interpolateViridis(index / this.option.legend.data.length));
-      this.drawPie(this.option.series);
-      this.initLegend(this.option.legend);
+    if (this.option && this.option.legend) {
+      const windowW: number = window.document.body.clientWidth;
+      const legendBottom: number = windowW < 1366 ? 48 : 55;
+      this.option.legend.bottom = legendBottom;
     }
-    this.isLoaded = true;
+    this.resetParams();
+    const wrapDom = d3.select('#' + this.id);
+    const hasSvg = wrapDom.select('svg');
+    if (hasSvg) {
+      hasSvg.remove();
+    }
+    this.svgW = Number.parseFloat(wrapDom.style('width'));
+    this.svgH = Number.parseFloat(wrapDom.style('height'));
+
+    this.initSvg(wrapDom);
+    this.drawTitle();
+    this.legendColors = this.option.color
+      || this.option.legend.data.map((dataItem: any, index: number) => d3.interpolateViridis(index / this.option.legend.data.length));
+    this.drawPie(this.option.series);
+    this.initLegend(this.option.legend);
+  }
+
+  private drawTitle() {
+    if (this.option && this.option.title && this.option.title.show) {
+      const title = this.option.title;
+      const centerTextG = this.svg.append('g')
+        .attr('id', 'centerTextG' + this.id)
+        .attr('class', 'center-text-g')
+        .attr('transform', () => {
+          if (title.position) {
+            const centerX = this.setRatio(title.position[0]) * this.svgW;
+            const centerY = this.setRatio(title.position[1]) * this.svgH;
+            return `translate(${centerX},${centerY})`;
+          }
+          return `translate(${10},${10})`;
+        });
+
+      centerTextG.append('text')
+        .attr('id', 'centerText' + this.id)
+        .text(title.value)
+        .style('font-size', '32px')
+        .style('font-weight', '600')
+        .attr('dominant-baseline', 'middle')
+        .attr('text-anchor', 'middle');
+    }
+
   }
 
   private legendItem(legendWrap: any, data: any[]) {
@@ -325,6 +348,13 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       });
   }
 
+  private updateTitle(value: string) {
+    if (this.option.title && this.option.title.show) {
+      this.option.title.value = value;
+      d3.select(`#centerText${this.id}`).text(this.option.title.value);
+    }
+  }
+
   // 添加鼠标事件
   private addMouseEvent(nodes: any, centerX: number, centerY: number, isInnerLabel: boolean) {
     const that = this;
@@ -338,6 +368,8 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
           .transition()
           .duration(300)
           .attr('d', d.arcPathEnter(d));
+
+        that.updateTitle(`${d.data.percent}%`);
       })
       .on('mouseleave', function (d: any, index: number) {
         if (!d.data.selected && index !== nodes.nodes().length - 1) {
@@ -351,6 +383,9 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
           .transition()
           .duration(300)
           .attr('d', d.arcPath(d));
+
+        d3.select(`#tooltip${that.id}`).style('opacity', '0');
+        that.updateTitle('');
       })
       .on('click', function (d: any, index: number) {
         nodes.each((d1: any) => (d1.data.selected = false));
@@ -384,7 +419,26 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
             .attr('transform', `translate(${centerX + dx},${centerY + dy})`);
         }
 
-        that.onSelect.emit(d.data);
+        that.OnSelect.emit(d.data);
+      })
+      .on('mousemove', (d: any) => {
+        const event = d3.event;
+        const tootip = d3.select(`#tooltip${this.id}`);
+        tootip.style('opacity', '1').text(`${d.data.name}：${d.data.value}`);
+        const tooltipW = Number.parseFloat(tootip.style('width'));
+        const tooltipH = Number.parseFloat(tootip.style('height'));
+        tootip
+          .style('top', (event.offsetY + tooltipH + 20 > this.svgH ? this.svgH - tooltipH : event.offsetY + 20) + 'px')
+          .style('left', (event.offsetX + tooltipW + 20 > this.svgW ? this.svgW - tooltipW : event.offsetX + 20) + 'px');
+
+        if (
+          this.option
+          && this.option.tooltip
+          && this.option.tooltip.formatter
+          && Object.prototype.toString.call(this.option.tooltip.formatter) === '[object Function]'
+        ) {
+          tootip.html(this.option.tooltip.formatter(d.data));
+        }
       });
   }
 

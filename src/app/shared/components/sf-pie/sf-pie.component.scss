@@ -1,4 +1,18 @@
 .sf-pie-wrap{
   width: 100%;
   height: 100%;
+  position: relative;
+
+  .sf-pie-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    display: inline-block;
+    color: #ffffff;
+    background-color: rgba($color: #000000, $alpha: 0.4);
+    pointer-events: none;
+    border-radius: 3px;
+    padding: 4px 8px;
+  }
 }
