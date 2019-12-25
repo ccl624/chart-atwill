@@ -7,14 +7,18 @@
 
     .chart-app-logo {
       float: left;
-      color: #ffffff;
+
       font-family: "Comic Sans MS", cursive, sans-serif;
       font-size: 20px;
       height: 100%;
-      width: 200px;
+      width: 170px;
       line-height: 50px;
       margin-left: 10px;
 
+      a{
+        display: block;
+        color: #ffffff;
+      }
       i {
         display: inline-block;
         font-size: 32px;
