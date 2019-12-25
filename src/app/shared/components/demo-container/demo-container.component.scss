@@ -4,6 +4,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  background: #293c55;
 
   .demo-item {
     width: 100%;
@@ -12,12 +13,12 @@
   }
 
   .demo-item:nth-of-type(2n) {
-    background: #f6f6f7;
+    // background: #f6f6f7;
     // flex: 1;
   }
 
   .demo-item:nth-of-type(2n-1){
-    background: #ffffff;
+    // background: #ffffff;
   }
 
   .chart-demo {

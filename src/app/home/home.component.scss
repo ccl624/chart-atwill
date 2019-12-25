@@ -1,25 +1,56 @@
-.home-wrap{
+.home-wrap {
   display: flex;
   height: 100%;
   // margin: 0 100px;
 
-  .charts-menu{
+  .charts-menu {
     width: 180px;
     height: 100%;
-    border: 1px solid red;
-    display: none;
+    // border: 1px solid red;
+    display: block;
+
+    .menu-list {
+      width: 100%;
+      height: 100%;
+      background: #293c55;
+
+      li a {
+        height: 50px;
+        display: block;
+        color: #ffffff;
+        line-height: 50px;
+        padding: 0 10px;
+
+        i {
+          display: inline-block;
+          width: 32px;
+          height: 32px;
+          border: 1px solid #999;
+          border-radius: 50%;
+          font-size: 18px;
+          text-align: center;
+          line-height: 32px;
+          vertical-align: middle;
+          margin-right: 10px;
+        }
+
+        &:hover {
+          background-color: #e43c59;
+        }
+      }
+    }
   }
 
-  .charts-content{
+  .charts-content {
     flex: 1;
     height: 100%;
     padding: 20px;
 
-    .chart-card-list{
+    .chart-card-list {
       display: flex;
       flex-wrap: wrap;
 
-      .chart-card a{
+      .chart-card a {
         display: block;
         border-radius: 5px;
         margin: 10px;
@@ -27,7 +58,7 @@
         overflow: hidden;
         box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 2px 3px 0 rgba(0, 0, 0, 0.1);
 
-        h4{
+        h4 {
           padding: 0px 10px;
           height: 30px;
           line-height: 30px;
@@ -36,21 +67,21 @@
           background: #ffffff;
         }
 
-        .card-img{
+        .card-img {
           height: calc(100% - 30px);
           text-align: center;
           vertical-align: middle;
           background-color: #dc8c67;
           border-top: 1px solid #ddd;
 
-          img{
+          img {
             width: 100%;
             height: 100%;
           }
         }
       }
 
-      .chart-card a:hover{
+      .chart-card a:hover {
         border: none;
         box-shadow: 0px 0px 10px #999;
         transition: transform 0.3s;
@@ -59,5 +90,3 @@
     }
   }
 }
-
-
