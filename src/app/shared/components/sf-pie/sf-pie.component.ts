@@ -1,22 +1,23 @@
-import { Component, OnInit, Input, Output, AfterViewInit, OnChanges, SimpleChanges, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, AfterViewInit, EventEmitter, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import * as d3 from 'd3';
-import { fromEvent } from 'rxjs';
-import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
-
+import { SfPieOption } from './sf-pie.interface';
+import { fromEvent, interval } from 'rxjs';
+import { map, debounceTime, throttle } from 'rxjs/operators';
 @Component({
   selector: 'sf-pie',
   templateUrl: './sf-pie.component.html',
   styleUrls: ['./sf-pie.component.scss']
 })
-export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
-  @Input() public option: any;
+export class SfPieComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('sfPieWrap') public sfPieWrap: ElementRef;
+
+  @ViewChild('sfPieTootip') public sfPieTootip: ElementRef;
+
+  @Input() public option: SfPieOption;
 
   @Output() public OnSelect = new EventEmitter<any>();
 
   @Output() public OnPieInit = new EventEmitter<any>();
-
-  public subjet: Subject<string> = new Subject<string>();
 
   private id = '';
 
@@ -44,12 +45,12 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
 
   private isEdge = false;
 
+  private resizeEvent: any;
+
   constructor() { }
 
-  public ngOnChanges(changes: SimpleChanges) {
-    if (changes.hasOwnProperty('option') && this.option && this.option.id) {
-      this.id = this.option && this.option.id ? this.option.id + new Date().getTime() : new Date().getTime();
-    }
+  public ngOnDestroy() {
+    this.resizeEvent.unsubscribe();
   }
 
   public ngOnInit() {
@@ -63,11 +64,13 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   public ngAfterViewInit() {
-    fromEvent(window, 'resize').subscribe((e: MouseEvent) => {
-      window.requestAnimationFrame(() => {
-        this.initPie(false);
+    // 动态设置高度
+    this.resizeEvent = fromEvent(window, 'resize')
+      .pipe(debounceTime(100))
+      .pipe(throttle((ev: any) => interval(100)))
+      .subscribe(() => {
+        this.initPie();
       });
-    });
   }
 
   private resetParams() {
@@ -78,21 +81,24 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   private initPie(isFirstLoad = true) {
+    if (!this.option) { return; }
+    this.id = this.option && this.option.id ? this.option.id + new Date().getTime() : new Date().getTime() + '';
     if (this.option && this.option.legend) {
       const windowW: number = window.document.body.clientWidth;
       const legendBottom: number = windowW < 1366 ? 48 : 55;
       this.option.legend.bottom = legendBottom;
     }
     this.resetParams();
-    const wrapDom = d3.select('#' + this.id);
-    const hasSvg = wrapDom.select('svg');
+    const wrapDom = this.sfPieWrap.nativeElement;
+    const wrapNode = d3.select(wrapDom);
+    const hasSvg = wrapNode.select('svg');
     if (hasSvg) {
       hasSvg.remove();
     }
-    this.svgW = Number.parseFloat(wrapDom.style('width'));
-    this.svgH = Number.parseFloat(wrapDom.style('height'));
+    this.svgW = Number.parseFloat(wrapNode.style('width'));
+    this.svgH = Number.parseFloat(wrapNode.style('height'));
 
-    this.initSvg(wrapDom);
+    this.initSvg(wrapNode);
     this.legendColors = this.option.color
       || this.option.legend.data.map((dataItem: any, index: number) => d3.interpolateViridis(index / this.option.legend.data.length));
     this.drawPie(this.option.series);
@@ -294,7 +300,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
 
     this.legendItem(legendWrap, data);
 
-    if (data[data.length - 1].right > this.svgW - 10) {
+    if (data[data.length - 1] && data[data.length - 1].right > this.svgW - 10) {
       this.drawSwitchBtn(legendWrap, data);
     }
   }
@@ -391,7 +397,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
           .duration(300)
           .attr('d', d.arcPath(d));
 
-        d3.select(`#tooltip${that.id}`).style('opacity', '0');
+        d3.select(that.sfPieTootip.nativeElement).style('opacity', '0');
         that.updateTitle('');
       })
       .on('click', function (d: any, index: number) {
@@ -430,7 +436,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       })
       .on('mousemove', (d: any) => {
         const event = d3.event;
-        const tootip = d3.select(`#tooltip${this.id}`);
+        const tootip = d3.select(this.sfPieTootip.nativeElement);
 
         tootip.text(`${d.data.name}：${d.data.value}`);
         if (
@@ -532,8 +538,8 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       .append('path')
       .attr('class', 'pie-path')
       .attr('fill', 'none')
-      .attr('stroke', '#ffffff')
-      .attr('stroke-width', 0)
+      .attr('stroke', seriesItem.borderColor || '#ffffff')
+      .attr('stroke-width', seriesItem.borderWidth || 0)
       .attr('style', 'cursor:pointer')
       .transition()
       .duration(500)
@@ -594,92 +600,87 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnChanges {
       });
   }
 
-  private getY(d: any, pieParams: any) {
-    return d.tarY || - Math.cos(d.arc) * (pieParams.endR + 20);
+  private getTarY(curNode: any, index: number, nodes: any[], r: number, isBottomHalf: boolean) {
+    const dy = 14;
+    const preY = index === 0 ? 0 : nodes[index - 1].tarY;
+    let y = - Math.cos(curNode.arc) * r;
+    let disY = y - preY;
+    if (disY < 0 && isBottomHalf) {
+      y = preY;
+      disY = 0;
+    }
+
+    if (disY > 0 && !isBottomHalf) {
+      y = preY;
+      disY = 0;
+    }
+
+    curNode.tarY = Math.abs(disY) < dy ? y - (isBottomHalf ? 1 : -1) * (Math.abs(disY) - dy) : y;
   }
 
-  private getX(d: any, pieParams: any) {
-    return Math.sin(d.arc) * (pieParams.endR + 20);
+  private getTarX(node: any, index: number, nodes: any[], pieR: number) {
+    const dy = 14;
+    let disY = 0;
+    const y = node.tarY;
+    let preY = 0;
+
+    const x = Math.sin(node.arc) * pieR;
+    let tarX = x;
+    let preX = 0;
+    if (index !== 0) {
+      const preNode = nodes[index - 1];
+      preX = Math.sin(preNode.arc) * pieR;
+      preY = preNode.tarY;
+      disY = y - preY;
+
+      if (Math.abs(disY) < dy && node.arc < Math.PI) {
+        const dTarX = Math.pow(preX, 2) - 2 * dy * preY + Math.pow(dy, 2);
+        if (dTarX >= 0) {
+          tarX = Math.sqrt(dTarX);
+        }
+      } else if (Math.abs(disY) < dy && node.arc > Math.PI) {
+        const dTarX = Math.pow(preX, 2) + 2 * dy * preY + Math.pow(dy, 2);
+        if (dTarX >= 0) {
+          tarX = -Math.sqrt(dTarX);
+        }
+      }
+    }
+    return tarX;
   }
 
   private createForceSimulation(nodes: any[], pieParams: any, seriesItem: any) {
     const height = (seriesItem.label && seriesItem.label.height) || 24;
     const width = seriesItem.label && seriesItem.label.width;
-    const dy = 14;
-    // const forceLink = d3.forceCollide(10);
-    const forceY = d3.forceY((d: any, index) => {
-      let disY = 0;
-      let y = this.getY(d, pieParams);
-      let tarY = y;
-      let preY = 0;
-      if (index !== 0) {
-        // console.log(nodes[index - 1].y, d.y);
-        preY = this.getY(nodes[index - 1], pieParams);
-        disY = y - preY;
+    const pieR = pieParams.endR + 20;
+    const pi = Math.PI;
+    const lessHalfPi: any[] = []; // 0-pi/2
+    const lessPi: any[] = [];  // pi/2 - pi
+    const lessOneHalfPi: any[] = []; // pi - 3/2 * pi
+    const lessDoublePi: any[] = []; // 3/2 * pi - 2*pi
 
-        const preArc = nodes[index - 1].arc;
-        const curArc = d.arc;
-        if (preArc < Math.PI && curArc > Math.PI) {
-          preY = - Math.cos(d.arc) * (pieParams.endR + 20);
-        }
-
-        if (d.arc < Math.PI) {
-          if (disY < 0) {
-            y = preY;
-            disY = 0;
-          }
-          if (Math.abs(disY) < 14) {
-            tarY = y + 14 - Math.abs(disY);
-          }
-        } else if (d.arc >= Math.PI) {
-          if (disY > 0) {
-            y = preY;
-            disY = 0;
-          }
-          if (Math.abs(disY) < 14) {
-            tarY = y - 14 + Math.abs(disY);
-          }
-        }
+    nodes.forEach(node => {
+      if (node.arc > 0 && node.arc <= pi / 2) {
+        lessHalfPi.push(node);
+      } else if (node.arc > pi / 2 && node.arc <= pi) {
+        lessPi.push(node);
+      } else if (node.arc > pi && node.arc <= 3 / 2 * pi) {
+        lessOneHalfPi.push(node);
+      } else if (node.arc > 3 / 2 * pi && node.arc <= 2 * pi) {
+        lessDoublePi.push(node);
       }
-      // console.log(d.tarY, index);
-
-      d.tarY = tarY;
-
-      return tarY;
     });
-    const forceX = d3.forceX((d: any, index) => {
-      let disY = 0;
-      const y = this.getY(d, pieParams);
-      let tarY = y;
-      let preY = 0;
 
-      const x = this.getX(d, pieParams);
-      let tarX = x;
-      let preX = 0;
-      if (index !== 0) {
-        // console.log(nodes[index - 1].y, d.y);
-        preX = this.getX(nodes[index - 1], pieParams);
-        preY = this.getY(nodes[index - 1], pieParams);
-        disY = y - preY;
-        tarY = Math.abs(disY) < 14 ? y + disY : y;
+    lessHalfPi.reverse();
+    lessOneHalfPi.reverse();
+    lessHalfPi.forEach((node, index) => this.getTarY(node, index, lessHalfPi, pieR, false));
+    lessPi.forEach((node, index) => this.getTarY(node, index, lessPi, pieR, true));
+    lessOneHalfPi.forEach((node, index) => this.getTarY(node, index, lessOneHalfPi, pieR, true));
+    lessDoublePi.forEach((node, index) => this.getTarY(node, index, lessDoublePi, pieR, false));
 
-        if (Math.abs(disY) < 14 && d.arc < Math.PI) {
-          const dTarX = Math.pow(preX, 2) - 2 * dy * preY + Math.pow(dy, 2);
-          if (dTarX >= 0) {
-            tarX = Math.sqrt(dTarX);
-          }
-        } else if (Math.abs(disY) < 14 && d.arc > Math.PI) {
-          const dTarX = Math.pow(preX, 2) + 2 * dy * preY + Math.pow(dy, 2);
-          if (dTarX >= 0) {
-            tarX = -Math.sqrt(dTarX);
-          }
-        }
-      }
-      return tarX;
-    });
+    const forceY = d3.forceY((d: any) => d.tarY);
+    const forceX = d3.forceX((d: any, index) => this.getTarX(d, index, nodes, pieR));
 
     d3.forceSimulation(nodes)
-      // .force('link', forceLink)
       .force('x', forceX)
       .force('y', forceY)
       .on('tick', () => {
