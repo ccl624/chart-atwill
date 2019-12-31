@@ -35,8 +35,12 @@
         }
 
         &:hover {
-          background-color: #e43c59;
+          background-color: #162436;
         }
+      }
+
+      li a.active {
+        background-color: #e43c59;
       }
     }
   }
@@ -47,7 +51,7 @@
     overflow-y: auto;
     scroll-behavior: smooth;
 
-    .groups-wrap{
+    .groups-wrap {
       width: 100%;
       padding: 0 20px;
     }

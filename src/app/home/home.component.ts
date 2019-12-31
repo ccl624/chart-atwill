@@ -15,6 +15,8 @@ export class HomeComponent implements OnInit {
 
   public selectedGroupTop: number;
 
+  public selectedIndex = -1;
+
   public cardGroups: any[] = [
     {
       groupName: '折线图',
@@ -65,7 +67,8 @@ export class HomeComponent implements OnInit {
 
   }
 
-  public selectMenu(group: any) {
+  public selectMenu(group: any, index: number) {
+    this.selectedIndex = index;
     this.selectedGroupTop = group.top - 50;
 
     const parentNode = this.chartsContent.nativeElement;
