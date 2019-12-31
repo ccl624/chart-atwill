@@ -1,38 +1,19 @@
 <div class="home-wrap">
   <div class="charts-menu">
     <ul class="menu-list">
-      <li>
-        <a href="javascript:;">
-          <i class="icon-line"></i><span>折线图</span>
-        </a>
-      </li>
-      <li>
-        <a href="javascript:;">
-          <i class="icon-bar"></i><span>柱状图</span>
-        </a>
-      </li>
-      <li>
-        <a href="javascript:;">
-          <i class="icon-pie"></i><span>饼图</span>
-        </a>
-      </li>
-      <li>
-        <a href="javascript:;">
-          <i class="icon-map"></i><span>地图</span>
+      <li *ngFor="let cardGroup of cardGroups; let i = index">
+        <a href="javascript:;" (click)="selectMenu(cardGroup)">
+          <i class="{{cardGroup.icon}}"></i>
+          <span>{{cardGroup.groupName}}</span>
         </a>
       </li>
     </ul>
   </div>
-  <div class="charts-content">
-    <ul #cardListElement class="chart-card-list">
-      <li *ngFor="let card of cardList" class="chart-card">
-        <a [ngStyle]="{'height': cardH * 0.8 + 'px', 'width': cardH + 'px'}" [routerLink]="card.link">
-          <h4>{{card?.name}}</h4>
-          <div class="card-img">
-            <img [attr.src]="card.src" alt="图片加载失败">
-          </div>
-        </a>
-      </li>
-    </ul>
+  <div #chartsContent class="charts-content">
+    <div class="groups-wrap">
+      <ng-container *ngFor="let cardGroup of cardGroups">
+        <card-group [group]="cardGroup"></card-group>
+      </ng-container>
+    </div>
   </div>
 </div>

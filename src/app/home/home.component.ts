@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { fromEvent } from 'rxjs';
 
 @Component({
@@ -7,19 +7,56 @@ import { fromEvent } from 'rxjs';
   styleUrls: ['./home.component.scss']
 })
 
-export class HomeComponent implements OnInit, AfterViewInit {
+export class HomeComponent implements OnInit {
 
-  @ViewChild('cardListElement') public cardListElement: ElementRef;
+  @ViewChild('chartsContent') public chartsContent: ElementRef;
 
   public cardH = 0;
 
-  public cardList: any[] = [
-    { name: '折线图', link: '/line-demo', src: 'assets/image/line-demo.png' },
-    { name: '柱状图', link: '/bar-demo', src: 'assets/image/bar-demo.png' },
-    { name: '柱状图3D', link: '/bar3D-demo', src: 'assets/image/bar3D-demo.png' },
-    { name: '饼图', link: '/pie-demo', src: 'assets/image/pie-demo.png' },
-    { name: '仪表盘', link: '/guage-demo', src: 'assets/image/guage.png' },
-    { name: '中国地图', link: '/china-map', src: 'assets/image/china_map.png' },
+  public selectedGroupTop: number;
+
+  public cardGroups: any[] = [
+    {
+      groupName: '折线图',
+      groupType: 'Line',
+      icon: 'icon-line',
+      cardList: [
+        { name: '折线图', link: '/line-demo', src: 'assets/image/line-demo.png' },
+      ]
+    },
+    {
+      groupName: '柱状图',
+      groupType: 'Bar',
+      icon: 'icon-bar',
+      cardList: [
+        { name: '柱状图', link: '/bar-demo', src: 'assets/image/bar-demo.png' },
+        { name: '柱状图3D', link: '/bar3D-demo', src: 'assets/image/bar3D-demo.png' },
+      ]
+    },
+    {
+      groupName: '饼图',
+      groupType: 'Pie',
+      icon: 'icon-pie',
+      cardList: [
+        { name: '饼图', link: '/pie-demo', src: 'assets/image/pie-demo.png' },
+      ]
+    },
+    {
+      groupName: '仪表盘',
+      groupType: 'Gauge',
+      icon: 'icon-gauge',
+      cardList: [
+        { name: '仪表盘', link: '/guage-demo', src: 'assets/image/guage.png' },
+      ]
+    },
+    {
+      groupName: '地图',
+      groupType: 'Map',
+      icon: 'icon-map',
+      cardList: [
+        { name: '中国地图', link: '/china-map', src: 'assets/image/china_map.png' },
+      ]
+    },
   ];
 
   constructor() { }
@@ -28,27 +65,14 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   }
 
-  public ngAfterViewInit(): void {
-    window.requestAnimationFrame(() => {
-      this.resetCardSize();
-    });
-    fromEvent(window, 'resize').subscribe((e: MouseEvent) => {
-      this.resetCardSize();
-    });
-  }
+  public selectMenu(group: any) {
+    this.selectedGroupTop = group.top - 50;
 
-  private resetCardSize() {
-    const cardLsitP = this.cardListElement.nativeElement.getBoundingClientRect();
-    const cardListW = cardLsitP.width;
-
-    if (cardListW > 1600) {
-      this.cardH = cardListW / 6 - 20;
-    } else if (cardListW < 1600 && cardListW > 1200) {
-      this.cardH = cardListW / 5 - 20;
-    } else if (cardListW < 1200 && cardListW > 800) {
-      this.cardH = cardListW / 4 - 20;
-    } else {
-      this.cardH = cardListW / 3 - 20;
-    }
+    const parentNode = this.chartsContent.nativeElement;
+    parentNode.scrollTop = this.selectedGroupTop;
+    // parentNode.scrollTo({
+    //   top: this.selectedGroupTop,
+    //   behavior: 'smooth'
+    // });
   }
 }

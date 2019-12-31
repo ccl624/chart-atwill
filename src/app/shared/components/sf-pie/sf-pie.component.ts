@@ -221,6 +221,15 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnDestroy {
       .attr('transform', `translate(${-this.currentLefts[this.currentIndex - 1] + 5}, 14)`);
   }
 
+  private getBackgroundColor(node: any) {
+    const color = d3.select(node).style('background-color');
+    if (color === 'rgba(0, 0, 0, 0)') {
+      return this.getBackgroundColor(node.parentNode);
+    } else {
+      return color;
+    }
+  }
+
   private drawSwitchBtn(legendWrap: any, data: any[]) {
     const that = this;
     const prePageWidth = this.svgW - 66;
@@ -242,7 +251,7 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnDestroy {
     legendSwitchBtn
       .append('rect')
       .attr('class', 'btn-cover')
-      .attr('fill', '#ffffff')
+      .attr('fill', this.getBackgroundColor(this.svg.node().parentNode))
       .attr('width', 66)
       .attr('height', 40);
 
