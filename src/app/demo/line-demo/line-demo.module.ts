@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 import { LineDemoComponent } from './line-demo.component';
-import { DemoContainerModule, ChartModule } from 'src/app/shared';
+import { DemoContainerModule, ChartModule, AcezEditorModule } from 'src/app/shared';
+import { LineDemoService } from './line-demo.service';
 
 const routes: Routes = [
   { path: '', component: LineDemoComponent }
@@ -14,8 +15,10 @@ const routes: Routes = [
     CommonModule,
     RouterModule.forChild(routes),
     DemoContainerModule,
-    ChartModule
+    ChartModule,
+    AcezEditorModule
   ],
-  exports: [LineDemoComponent]
+  exports: [LineDemoComponent],
+  providers: [LineDemoService]
 })
 export class LineDemoModule { }

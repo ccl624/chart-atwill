@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { Grid3D } from './grid/3D/grid';
 import { Grid } from './grid/2D/grid';
 import { Title } from './title/title';
@@ -22,6 +22,8 @@ export class ChartComponent implements OnInit, OnChanges {
 
     @Input() style = {width: '100%', height: '100%'};
 
+    @Output() public OnInitChart = new EventEmitter<any>();
+
     public cliclStream: Subject<string> = new Subject<string>();
 
     constructor(
@@ -30,10 +32,11 @@ export class ChartComponent implements OnInit, OnChanges {
 
     ngOnChanges(changes: SimpleChanges) {
         for (const change in changes) {
-            if (change === 'option') {
+            if (change === 'option' && this.option) {
                 this.chartId = this.option.chartId || this.chartId;
                 const t = requestAnimationFrame(() => {
                     this.initChart();
+                    this.OnInitChart.emit(this.initChart.bind(this));
                     cancelAnimationFrame(t);
                 });
             }
@@ -56,7 +59,7 @@ export class ChartComponent implements OnInit, OnChanges {
     // }
 
     initChart() {
-        if (this.option.chartId) {
+        if (this.option && this.option.chartId) {
             const chartDivd = d3.selectAll(`#sfChart${this.chartId}`);
             let svg = chartDivd.selectAll('svg');
             if (!svg.empty()) {
