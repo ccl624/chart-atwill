@@ -1,9 +1,8 @@
 <demo-container>
   <div class="demo-show">
-    <sf-chart #sfChart [option]="option"></sf-chart>
+    <sf-chart #sfChart [option]="option" (OnInitChart)="OnInitChart($event)"></sf-chart>
   </div>
   <div class="demo-info">
-    Bar Demo
+    <app-ace-editor [text]="myCode" (runCode)="showChartResult($event)"></app-ace-editor>
   </div>
-
 </demo-container>

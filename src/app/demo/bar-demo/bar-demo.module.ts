@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 import { BarDemoComponent } from './bar-demo.component';
-import { DemoContainerModule, ChartModule } from 'src/app/shared';
+import { DemoContainerModule, ChartModule, AcezEditorModule } from 'src/app/shared';
+import { BarDemoService } from './bar-demo.service';
 
 const routes: Routes = [
   { path: '', component: BarDemoComponent }
@@ -14,8 +15,10 @@ const routes: Routes = [
     CommonModule,
     RouterModule.forChild(routes),
     DemoContainerModule,
-    ChartModule
+    ChartModule,
+    AcezEditorModule
   ],
-  exports: [BarDemoComponent]
+  exports: [BarDemoComponent],
+  providers: [BarDemoService]
 })
 export class BarDemoModule { }
