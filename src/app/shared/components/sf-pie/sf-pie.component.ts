@@ -318,8 +318,9 @@ export class SfPieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.svg = dom
       .append('svg')
       .attr('class', 'sf-pie-chart')
-      .attr('width', this.svgW)
-      .attr('height', this.svgH);
+      .attr('viewBox', `0 0 ${this.svgW} ${this.svgH}`)
+      .attr('width', '100%')
+      .attr('height', '100%');
   }
 
   private getPieParams(seriesItem: any) {

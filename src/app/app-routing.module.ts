@@ -10,6 +10,7 @@ const routes: Routes = [
   { path: 'bar-demo', loadChildren: './demo/bar-demo/bar-demo.module#BarDemoModule' },
   { path: 'pie-demo', loadChildren: './demo/pie-demo/pie-demo.module#PieDemoModule' },
   { path: 'bar3D-demo', loadChildren: './demo/bar3D-demo/bar3D-demo.module#Bar3DDemoModule' },
+  { path: 'bookshelf-demo', loadChildren: './demo/bookshelf-demo/bookshelf-demo.module#BookshelfDemoModule' },
   { path: '**', pathMatch: 'full', redirectTo: 'home' }
 ];
 
