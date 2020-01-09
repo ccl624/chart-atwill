@@ -1,0 +1,176 @@
+[
+  {
+    "id": "01",
+    "width": 200,
+    "height": 800,
+    "translateX": 0,
+    "translateY": 0,
+    "level": 8,
+    "shelfLevels": [
+      {
+        "id": "11",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 350
+      },
+      {
+        "id": "12",
+        "width": 200,
+        "height": 70,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 300
+      },
+      {
+        "id": "13",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 250
+      },
+      {
+        "id": "14",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 200
+      },
+      {
+        "id": "15",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 150
+      },
+      {
+        "id": "16",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 100
+      }
+    ]
+  },
+  {
+    "id": "02",
+    "width": 200,
+    "height": 600,
+    "translateX": 200,
+    "translateY": 0,
+    "level": 8,
+    "shelfLevels": [
+      {
+        "id": "21",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 350
+      },
+      {
+        "id": "22",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 300
+      },
+      {
+        "id": "23",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 250
+      },
+      {
+        "id": "24",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 200
+      },
+      {
+        "id": "25",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 150
+      },
+      {
+        "id": "26",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 100
+      }
+    ]
+  },
+  {
+    "id": "03",
+    "width": 200,
+    "height": 400,
+    "translateX": 400,
+    "translateY": 0,
+    "level": 8,
+    "shelfLevels": [
+      {
+        "id": "31",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 350
+      },
+      {
+        "id": "32",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 300
+      },
+      {
+        "id": "33",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 250
+      },
+      {
+        "id": "34",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 200
+      },
+      {
+        "id": "35",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 150
+      },
+      {
+        "id": "36",
+        "width": 200,
+        "height": 50,
+        "isFree": false,
+        "translateX": 0,
+        "translateY": 100
+      }
+    ]
+  }
+]

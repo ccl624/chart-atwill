@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { BookshelfDemoService } from './bookshelf-demo.service';
 
 @Component({
   selector: 'app-bookshelf-demo',
@@ -7,9 +8,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class BookshelfDemoComponent implements OnInit {
 
-  constructor() { }
+  public shelfData: any = [];
+
+  constructor(
+    private bookshelfDemoService: BookshelfDemoService
+  ) { }
 
   ngOnInit() {
+
+    this.bookshelfDemoService.getShelfData().subscribe(res => {
+      console.log(res);
+      this.shelfData = res;
+    });
   }
 
 }

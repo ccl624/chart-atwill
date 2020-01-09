@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 import { BookshelfDemoComponent } from './bookshelf-demo.component';
 import { BookshelfModule } from 'src/app/shared';
+import { BookshelfDemoService } from './bookshelf-demo.service';
 
 const routes: Routes = [
   { path: '', component: BookshelfDemoComponent }
@@ -15,6 +16,7 @@ const routes: Routes = [
     RouterModule.forChild(routes)
   ],
   declarations: [BookshelfDemoComponent],
+  providers: [BookshelfDemoService]
 })
 
 export class BookshelfDemoModule { }
