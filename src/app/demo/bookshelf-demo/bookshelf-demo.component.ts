@@ -17,7 +17,6 @@ export class BookshelfDemoComponent implements OnInit {
   ngOnInit() {
 
     this.bookshelfDemoService.getShelfData().subscribe(res => {
-      console.log(res);
       this.shelfData = res;
     });
   }

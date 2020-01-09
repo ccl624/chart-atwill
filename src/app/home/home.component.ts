@@ -59,6 +59,14 @@ export class HomeComponent implements OnInit {
         { name: '中国地图', link: '/china-map', src: 'assets/image/china_map.png' },
       ]
     },
+    {
+      groupName: '拖拽',
+      groupType: 'Drag',
+      icon: 'icon-map',
+      cardList: [
+        { name: '拖拽', link: '/bookshelf-demo', src: 'assets/image/drag-demo.png' },
+      ]
+    },
   ];
 
   constructor() { }
