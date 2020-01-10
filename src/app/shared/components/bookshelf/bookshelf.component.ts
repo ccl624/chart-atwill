@@ -54,12 +54,14 @@ export class BookshelfComponent implements OnInit {
 
     this.svg = shelfNode.append('svg')
       .attr('class', 'shelf-svg')
+      .attr('viewBox', `0 0 ${this.width} ${this.height}`)
+      .attr('preserveAspectRatio', 'xMinyMin meet')
       .attr('width', '100%')
       .attr('height', '100%');
 
     this.shelfNodes = this.svg.selectAll('.shelf-item-g')
       .data(this.shelfData.map((shelf: any, i: number) => {
-        shelf.height = 165 * this.U;
+        shelf.height = 120 * this.U;
         shelf.width = 60 * this.U;
         shelf.tx = (shelf.width + 1) * i;
         shelf.ty = this.height - shelf.height;
@@ -77,9 +79,7 @@ export class BookshelfComponent implements OnInit {
       .enter()
       .append('g')
       .attr('class', 'shelf-item-g')
-      .attr('transform', (d: any, i: number) => {
-        return `translate(${d.tx},${d.ty})`;
-      });
+      .attr('transform', (d: any, i: number) => `translate(${d.tx},${d.ty})`);
 
     this.shelfNodes.append('rect')
       .attr('class', 'shelf-item-rect')
@@ -90,60 +90,51 @@ export class BookshelfComponent implements OnInit {
       .attr('stroke-width', 0);
 
     const that = this;
-    this.shelfNodes.each(function (d: any, i: number) {
+    this.shelfNodes.each(function(d: any, i: number) {
       that.updateShelfLevel(d.shelfLevels, this, false);
     });
-    this.addOriginArea();
-    this.addForbiddenArea();
+    this.forbidArea = this.addNoteArea({ fillColor: 'red', note: '区域已满', fontSize: 36 });
+    this.originArea = this.addNoteArea({ fillColor: 'green', note: '起始位置', fontSize: 18 });
   }
 
-  private addOriginArea() {
-    this.originArea = this.svg.append('g')
-      .attr('class', 'origin-area-g')
+  private addNoteArea(theme: any) {
+    const noteArea = this.svg.append('g')
+      .attr('class', 'note-area-g')
       .style('display', 'none');
-
-    this.originArea.append('rect')
-      .attr('class', 'origin-area-rect')
-      .attr('height', 15 * this.U)
-      .attr('width', 60 * this.U)
-      .attr('fill', `rgba(0,255,0,0.3)`)
-      .attr('stroke', 'green')
+    noteArea.append('rect')
+      .attr('class', 'note-area-rect')
+      .attr('fill', theme.fillColor)
+      .attr('stroke', theme.fillColor)
+      .attr('fill-opacity', 0.3)
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '5,5');
-
-    this.originArea.append('text')
-      .text('起始位置')
-      .attr('x', 60 * this.U / 2)
-      .attr('y', 15 * this.U / 2)
-      .attr('fill', 'rgba(255,255,255,0.8)')
-      .style('font-size', 12)
+    noteArea.append('text')
+      .attr('class', 'note-area-text')
+      .text(theme.note)
+      .attr('fill', '#ffffff')
+      .attr('opacity', 0.8)
+      .style('font-size', theme.fontSize)
       .style('font-weight', '600')
       .attr('dominant-baseline', 'middle')
       .attr('text-anchor', 'middle');
+    return noteArea;
   }
 
-  private addForbiddenArea() {
-    this.forbidArea = this.svg.append('g')
-      .attr('class', 'forbid-area-g')
-      .style('display', 'none');
-    this.forbidArea.append('rect')
-      .attr('class', 'forbid-area-rect')
-      .attr('height', 165 * this.U)
-      .attr('width', 60 * this.U)
-      .attr('fill', `rgba(255,0,0,0.3)`)
-      .attr('stroke', 'red')
-      .attr('stroke-width', 1)
-      .attr('stroke-dasharray', '5,5');
-    this.forbidArea.append('text')
-      .attr('class', 'forbid-area-text')
-      .text('区域已满')
-      .attr('x', 60 * this.U / 2)
-      .attr('y', 165 * this.U / 2)
-      .attr('fill', 'rgba(255,255,255,0.5)')
-      .style('font-size', 36)
-      .style('font-weight', '600')
-      .attr('dominant-baseline', 'middle')
-      .attr('text-anchor', 'middle');
+  private showNoteArea(area: any, isShow: boolean, node?: any) {
+    if (isShow) {
+      area.style('display', 'block')
+        .attr('transform', `translate(${node.tx},${node.ty})`);
+
+      area.selectAll('.note-area-rect')
+        .attr('width', node.width)
+        .attr('height', node.height);
+
+      area.selectAll('.note-area-text')
+        .attr('x', node.width / 2)
+        .attr('y', node.height / 2);
+    } else {
+      area.style('display', 'none');
+    }
   }
 
   private initContent(enter: any) {
@@ -187,7 +178,7 @@ export class BookshelfComponent implements OnInit {
       d.tx = p.tx;
       d.ty = d.ty + p.ty;
       node.attr('class', 'free-shlef-level').attr('transform', `translate(${d.tx},${d.ty})`);
-      this.originArea.style('display', 'block').attr('transform', `translate(${d.tx},${d.ty})`);
+      this.showNoteArea(this.originArea, true, d);
 
       const index = p.shelfLevels.findIndex((shelfLevel: any) => shelfLevel.id === node.datum().id);
       if (index !== -1) {
@@ -200,6 +191,7 @@ export class BookshelfComponent implements OnInit {
 
     }
   }
+
 
   private nextFrame(node: any, nodes: any[], p: any, parentNode: any) {
     window.requestAnimationFrame(() => {
@@ -261,7 +253,7 @@ export class BookshelfComponent implements OnInit {
       p.shelfLevels.push(nodeData);
       this.updateShelfLevel(p.shelfLevels, parentNode);
 
-      this.forbidArea.style('display', 'none');
+      this.showNoteArea(this.forbidArea, false);
     }
     node.remove();
   }
@@ -288,39 +280,36 @@ export class BookshelfComponent implements OnInit {
       }).on('end', function (d: any) {
         const node = d3.select(this);
         that.checkCollisionWidthShelfs(node, d, that.shelfNodes, true);
-        that.originArea.style('display', 'none');
+        that.showNoteArea(that.originArea, false);
       });
   }
 
   private checkCollisionWidthShelfs(node: any, d: any, shelfNodes: any, isDragEnd: boolean) {
     const that = this;
     let hasDeepCross = false;
+    let deepShelf: any;
+    let deepShelfNode: any;
     shelfNodes.each(function (shelf: any, index: number) {
       const collision = that.checkCollision(d, shelf);
       if (collision.isDeepCross) {
         hasDeepCross = true;
-        const totalH = shelf.shelfLevels.reduce((sumH: number, level: any) => level.height + sumH, 0);
-        if (totalH + d.height <= shelf.height && isDragEnd) {
-          that.backToNewParent(node, this, d);
-        } else if (totalH + d.height > shelf.height && isDragEnd) {
-          that.backToOriginParent(node, that.parentNode, d);
-        } else if (totalH + d.height > shelf.height && !isDragEnd) {
-          that.forbidArea.style('display', 'block')
-            .attr('transform', `translate(${shelf.tx},${shelf.ty})`)
-            .attr('width', shelf.width)
-            .attr('height', shelf.height)
-            .selectAll('.forbid-area-text')
-            .attr('x', shelf.width / 2)
-            .attr('y', shelf.height / 2);
-        } else if (totalH + d.height <= shelf.height && !isDragEnd) {
-          that.forbidArea.style('display', 'none');
-        }
-      } else {
-        that.forbidArea.style('display', 'none');
+        deepShelf = shelf;
+        deepShelfNode = this;
       }
     });
 
-    if (isDragEnd && !hasDeepCross) {
+    if (hasDeepCross) {
+      const totalH = deepShelf.shelfLevels.reduce((sumH: number, level: any) => level.height + sumH, 0);
+      if (totalH + d.height <= deepShelf.height && isDragEnd) {
+        this.backToNewParent(node, deepShelfNode, d);
+      } else if (totalH + d.height > deepShelf.height && isDragEnd) {
+        this.backToOriginParent(node, this.parentNode, d);
+      } else if (totalH + d.height > deepShelf.height && !isDragEnd) {
+        this.showNoteArea(this.forbidArea, true, deepShelf);
+      } else if (totalH + d.height <= deepShelf.height && !isDragEnd) {
+        this.showNoteArea(this.forbidArea, false);
+      }
+    } else if (isDragEnd && !hasDeepCross) {
       that.backToOriginParent(node, that.parentNode, d);
     }
   }
@@ -341,17 +330,11 @@ export class BookshelfComponent implements OnInit {
     const criticalLength = { x: (source.width + target.width) / 2, y: (source.height + target.height) / 2 }
     const isXCollision = disX < criticalLength.x;
     const isYCollision = disY < criticalLength.y;
-
-    const sourceArea = source.width * source.height;
-    const targetArea = target.width * target.height;
-
-    let crossArea = 0;
-    if (isXCollision && isYCollision) {
-      crossArea = (criticalLength.x - disX) * (criticalLength.y - disY);
-    }
+    const isXDeepCollision = disX >= 0 && (disX <= source.width / 2 || disX <= target.width / 2);
+    const isYDeepCollision = disY >= 0 && (disY <= source.height / 2 || disY <= target.height / 2);
     return {
       isCollision: isXCollision && isYCollision,
-      isDeepCross: crossArea > sourceArea / 2 || crossArea > targetArea / 2,
+      isDeepCross: isXDeepCollision && isYDeepCollision,
       px,
       py
     };
