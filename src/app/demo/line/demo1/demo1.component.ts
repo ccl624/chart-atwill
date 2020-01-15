@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { LineDemoService } from './line-demo.service';
+import { LineService } from '../line.service';
 
 @Component({
-  selector: 'app-line-demo',
-  templateUrl: './line-demo.component.html',
-  styleUrls: ['./line-demo.component.scss']
+  selector: 'app-demo1',
+  templateUrl: './demo1.component.html',
+  styleUrls: ['./demo1.component.scss']
 })
-export class LineDemoComponent implements OnInit {
+export class Demo1Component implements OnInit {
 
   public option: any;
 
@@ -15,11 +15,11 @@ export class LineDemoComponent implements OnInit {
   public chartInit: () => {};
 
   constructor(
-    private lineDemoService: LineDemoService
-  ) {}
+    private lineService: LineService
+  ) { }
 
   public ngOnInit() {
-    this.lineDemoService.getText().subscribe((res: any) => {
+    this.lineService.getText('assets/text/lineDemoCode.text').subscribe((res: any) => {
       this.myCode = res;
       this.showChartResult(this.myCode);
     });

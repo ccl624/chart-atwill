@@ -4,13 +4,13 @@ import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
 @Injectable()
-export class LineDemoService {
+export class LineService {
 
   constructor(
     private http: HttpClient,
   ) { }
 
-  public getText() {
-    return this.http.get('assets/text/lineDemoCode.text', { responseType: 'text' });
+  public getText(url: string) {
+    return this.http.get(url, { responseType: 'text' });
   }
 }

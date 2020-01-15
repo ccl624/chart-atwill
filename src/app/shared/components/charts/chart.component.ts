@@ -9,7 +9,7 @@ import { debounceTime } from 'rxjs/operators';
 import * as d3 from 'd3';
 
 @Component({
-    selector: 'sf-chart',
+    selector: 'app-chart',
     templateUrl: './chart.component.html',
     styleUrls: ['./chart.component.scss']
 })

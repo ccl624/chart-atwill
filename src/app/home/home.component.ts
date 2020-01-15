@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit {
       groupType: 'Line',
       icon: 'icon-line',
       cardList: [
-        { name: '折线图', link: '/line-demo', src: 'assets/image/line-demo.png' },
+        { name: '折线图', link: '/line/demo1', src: 'assets/image/line-demo.png' },
       ]
     },
     {
