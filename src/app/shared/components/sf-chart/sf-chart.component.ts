@@ -27,7 +27,7 @@ export class SfChartComponent implements OnInit, AfterViewInit, OnDestroy {
         this.sfChartInit();
       }
       clearTimeout(timeOut);
-    }, 300);
+    }, 20);
   }
 
   @Input() isAutoLoading = true;
@@ -76,7 +76,7 @@ export class SfChartComponent implements OnInit, AfterViewInit, OnDestroy {
     this.height = Number.parseFloat(wrapNode.style('height'));
     this.svg = wrapNode.append('svg').attr('width', '100%').attr('height', '100%');
 
-    this.xAxis = new XAxis(this.svg);
+    this.xAxis = new XAxis(this.svg, this.height);
     this.yAxis = new YAxis(this.svg);
 
     this.subscription = this.subject.pipe(debounceTime(300)).subscribe(async (res: string) => this.resizeChart(res));

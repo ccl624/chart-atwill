@@ -7,9 +7,10 @@ export class XAxis {
 
   public scale: any;
 
-  constructor(svg: any) {
+  constructor(svg: any, heigh: number) {
     this.scale = scale.scaleBand();
-    this.axisNode = svg.append('g').attr('class', 'axis-x-g');
+    this.axisNode = svg.append('g').attr('class', 'axis-x-g')
+      .attr('transform', `translate(${0},${heigh})`);
   }
 
   public updateData(xAxisOption: any, margin: any, width: number, height: number) {
@@ -20,6 +21,7 @@ export class XAxis {
 
   public resizeAxis(margin: any, width: number, height: number) {
     this.scale.range([margin.left, width - margin.right]);
+
     this.axisNode.call((g: any) => {
       const tg = g.transition().duration(300).attr('transform', `translate(${0},${height - margin.bottom})`);
       axis.axisBottom(this.scale)
