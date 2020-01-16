@@ -26,16 +26,10 @@ export class Demo2Component implements OnInit {
   }
 
   public showChartResult(event: any) {
+    console.log(event);
+
     const codeConfig: any = {};
     new Function(event).bind(codeConfig)();
     this.option = codeConfig.option;
-    const timeout = setTimeout(() => {
-      this.chartInit();
-      clearTimeout(timeout);
-    }, 200);
-  }
-
-  public onChartInit(callback: any) {
-    this.chartInit = callback;
   }
 }

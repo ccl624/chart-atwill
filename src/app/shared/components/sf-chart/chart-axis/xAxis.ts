@@ -20,32 +20,37 @@ export class XAxis {
 
   public resizeAxis(margin: any, width: number, height: number) {
     this.scale.range([margin.left, width - margin.right]);
-    this.axisNode
-      .attr('transform', `translate(${0},${height - margin.bottom})`)
-      .call(axis.axisBottom(this.scale).tickSizeInner(6).tickSizeOuter(6))
-      .call((g: any) => this.updateAxis(g, margin, width, height));
+    this.axisNode.call((g: any) => {
+      const tg = g.transition().duration(300).attr('transform', `translate(${0},${height - margin.bottom})`);
+      axis.axisBottom(this.scale)
+        .tickPadding(9)
+        .tickSizeInner(-height + margin.top + margin.bottom)
+        .tickSizeOuter(6)(tg);
+      this.updateAxis(g, margin, width, height);
+    });
   }
 
   private updateAxis(axisG: any, margin: any, width: number, height: number) {
     this.beautifyAxis(axisG, margin, width, height);
 
-    axisG.selectAll('.tick line').attr('transform', `translate(${this.scale.step() / 2},0)`);
-    axisG.selectAll('.tick .split-line').attr('y1', -height + margin.top + margin.bottom);
+    // axisG.selectAll('.tick line').attr('transform', `translate(${this.scale.step() / 2},0)`);
+    // axisG.selectAll('.tick .split-line').attr('y1', -height + margin.top + margin.bottom);
   }
 
   private beautifyAxis(axisG: any, margin: any, width: number, height: number) {
-    axisG.selectAll('.tick .split-line').remove();
+    axisG.selectAll('.tick .line-tick').remove();
 
     axisG.selectAll('.tick line')
-      .attr('transform', `translate(${this.scale.step() / 2},0)`)
-      .attr('class', 'axis-tick');
+      .attr('class', 'split-line')
+      .attr('stroke', '#ccc')
+      .attr('transform', `translate(${this.scale.step() / 2},0)`);
 
     axisG.selectAll('.tick')
       .append('line')
-      .attr('class', 'split-line')
-      .attr('y1', -height + margin.top + margin.bottom)
+      .attr('class', 'line-tick')
       .attr('y2', 0)
-      .attr('stroke', '#ccc');
+      .attr('stroke', '#000')
+      .attr('y1', 6);
 
     axisG.selectAll('line,path')
       .attr('stroke-width', 0.5)

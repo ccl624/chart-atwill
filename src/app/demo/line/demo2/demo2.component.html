@@ -1,6 +1,6 @@
 <demo-container>
   <div class="demo-show">
-    <sf-chart [option]="option" [isAutoLoading]="false" (initChart)="onChartInit($event)"></sf-chart>
+    <sf-chart [option]="option"></sf-chart>
   </div>
   <div class="demo-info">
     <app-ace-editor [text]="myCode" (runCode)="showChartResult($event)"></app-ace-editor>
