@@ -26,15 +26,8 @@ export class XAxis {
         .tickPadding(9)
         .tickSizeInner(-height + margin.top + margin.bottom)
         .tickSizeOuter(6)(tg);
-      this.updateAxis(g, margin, width, height);
+      this.beautifyAxis(g, margin, width, height);
     });
-  }
-
-  private updateAxis(axisG: any, margin: any, width: number, height: number) {
-    this.beautifyAxis(axisG, margin, width, height);
-
-    // axisG.selectAll('.tick line').attr('transform', `translate(${this.scale.step() / 2},0)`);
-    // axisG.selectAll('.tick .split-line').attr('y1', -height + margin.top + margin.bottom);
   }
 
   private beautifyAxis(axisG: any, margin: any, width: number, height: number) {
