@@ -7,10 +7,18 @@ export class Line {
   private line: any;
 
   constructor(svg: any, scaleX: any, scaleY: any, serie: any, data: any[]) {
-    this.line = shap.line().x((d: any) => scaleX(d.label)).y((d: any) => scaleY(d.value));
+    this.line = this.defindLine(serie, scaleX, scaleY);
     this.chartNode = svg.append('g').attr('class', 'line-g').attr('transform', `translate(${scaleX.step() / 2},0)`);
     this.drawPath(data);
     this.drawSymbol(data, scaleX, scaleY);
+  }
+
+  private defindLine(serie: any, scaleX: any, scaleY: any) {
+    const line = shap.line().x((d: any) => scaleX(d.label)).y((d: any) => scaleY(d.value));
+    if (serie.smooth) {
+      line.curve(shap.curveMonotoneX);
+    }
+    return line;
   }
 
   private drawPath(data: any[]) {
@@ -57,7 +65,7 @@ export class Line {
   }
 
   public resizeChart(scaleX: any, scaleY: any) {
-    this.line = shap.line().x((d: any) => scaleX(d.label)).y((d: any) => scaleY(d.value));
+    this.line.x((d: any) => scaleX(d.label)).y((d: any) => scaleY(d.value));
 
     this.chartNode
       .transition()

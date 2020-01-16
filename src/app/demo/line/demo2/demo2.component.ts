@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { LineService } from '../line.service';
 
 @Component({
@@ -14,20 +15,26 @@ export class Demo2Component implements OnInit {
 
   public chartInit: () => {};
 
+  private codes: any[] = [
+    { id: '01', url: 'assets/text/lineDemo1Code.text' },
+    { id: '02', url: 'assets/text/lineDemo2Code.text' }
+  ];
+
   constructor(
-    private lineService: LineService
+    private lineService: LineService,
+    private route: ActivatedRoute
   ) { }
 
   public ngOnInit() {
-    this.lineService.getText('assets/text/lineDemo2Code.text').subscribe((res: any) => {
+    const id = this.route.snapshot.paramMap.get('id');
+    const tarCode = this.codes.find(code => code.id === id);
+    this.lineService.getText(tarCode.url).subscribe((res: any) => {
       this.myCode = res;
       this.showChartResult(this.myCode);
     });
   }
 
   public showChartResult(event: any) {
-    console.log(event);
-
     const codeConfig: any = {};
     new Function(event).bind(codeConfig)();
     this.option = codeConfig.option;

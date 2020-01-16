@@ -6,7 +6,7 @@ import { Demo2Component } from './demo2/demo2.component';
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'demo1' },
   { path: 'demo1', component: Demo1Component },
-  { path: 'demo2', component: Demo2Component },
+  { path: 'demo2/:id', component: Demo2Component },
 ];
 
 @NgModule({
