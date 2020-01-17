@@ -16,8 +16,9 @@ export class Demo2Component implements OnInit {
   public chartInit: () => {};
 
   private codes: any[] = [
-    { id: '01', url: 'assets/text/lineDemo1Code.text' },
-    { id: '02', url: 'assets/text/lineDemo2Code.text' }
+    { id: '01', url: 'assets/text/lineDemoBasic.text' },
+    { id: '02', url: 'assets/text/lineDemoSmooth.text' },
+    { id: '03', url: 'assets/text/lineDemoArea.text' }
   ];
 
   constructor(

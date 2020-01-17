@@ -1,5 +1,5 @@
-import * as scale from 'd3-scale';
-import * as axis from 'd3-axis';
+import * as SCALE from 'd3-scale';
+import * as AXIS from 'd3-axis';
 
 export class YAxis {
 
@@ -8,7 +8,7 @@ export class YAxis {
   public scale: any;
 
   constructor(svg: any) {
-    this.scale = scale.scaleLinear();
+    this.scale = SCALE.scaleLinear();
     this.axisNode = svg.append('g').attr('class', 'axis-y-g');
   }
 
@@ -21,7 +21,7 @@ export class YAxis {
     this.scale.range([height - margin.bottom, margin.top]);
     this.axisNode.call((g: any) => {
       const tg = g.transition().duration(300).attr('transform', `translate(${margin.left},${0})`);
-      axis.axisLeft(this.scale)
+      AXIS.axisLeft(this.scale)
         .tickPadding(9)
         .tickSizeInner(-width + margin.right + margin.left)
         .tickSizeOuter(6)(tg);

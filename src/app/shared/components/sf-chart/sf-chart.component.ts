@@ -95,11 +95,11 @@ export class SfChartComponent implements OnInit, AfterViewInit, OnDestroy {
       const chartItem = this.charts.find(item => item.id === serie.type + index);
       if (chartItem) {
         const chartInstance = chartItem.chartInstance;
-        chartInstance.updateData(x, y, serie, data);
+        chartInstance.updateChart(serie, data, x, y, minAndMax);
       } else {
         const chart = {
           id: serie.type + index,
-          chartInstance: new Line(this.svg, x, y, serie, data)
+          chartInstance: new Line(this.svg, serie, data, x, y, minAndMax)
         };
         this.charts.push(chart);
       }
@@ -113,9 +113,10 @@ export class SfChartComponent implements OnInit, AfterViewInit, OnDestroy {
     const w = Number.parseFloat(whs[0]);
     const h = Number.parseFloat(whs[1]);
     const margin = this.sfcService.getChartMargin(this.chartOption, w, h);
+    const minAndMax = this.sfcService.getMinAndMax(this.chartOption);
     this.xAxis.resizeAxis(margin, w, h);
     this.yAxis.resizeAxis(margin, w, h);
-    this.charts.forEach(chart => chart.chartInstance.resizeChart(this.xAxis.scale, this.yAxis.scale));
+    this.charts.forEach(chart => chart.chartInstance.resizeChart(this.xAxis.scale, this.yAxis.scale, minAndMax));
   }
 
   private listenResize(dom: any) {

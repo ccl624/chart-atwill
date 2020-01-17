@@ -1,5 +1,5 @@
-import * as scale from 'd3-scale';
-import * as axis from 'd3-axis';
+import * as SCALE from 'd3-scale';
+import * as AXIS from 'd3-axis';
 
 export class XAxis {
 
@@ -8,7 +8,7 @@ export class XAxis {
   public scale: any;
 
   constructor(svg: any, heigh: number) {
-    this.scale = scale.scaleBand();
+    this.scale = SCALE.scaleBand();
     this.axisNode = svg.append('g').attr('class', 'axis-x-g')
       .attr('transform', `translate(${0},${heigh})`);
   }
@@ -24,7 +24,7 @@ export class XAxis {
 
     this.axisNode.call((g: any) => {
       const tg = g.transition().duration(300).attr('transform', `translate(${0},${height - margin.bottom})`);
-      axis.axisBottom(this.scale)
+      AXIS.axisBottom(this.scale)
         .tickPadding(9)
         .tickSizeInner(-height + margin.top + margin.bottom)
         .tickSizeOuter(6)(tg);
@@ -43,6 +43,7 @@ export class XAxis {
     axisG.selectAll('.tick')
       .append('line')
       .attr('class', 'line-tick')
+      .attr('transform', `translate(${this.scale.step() / 2},0)`)
       .attr('y2', 0)
       .attr('stroke', '#000')
       .attr('y1', 6);

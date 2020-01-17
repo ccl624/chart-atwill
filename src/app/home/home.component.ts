@@ -25,6 +25,7 @@ export class HomeComponent implements OnInit {
       cardList: [
         { name: '基本折线图', link: '/line/demo2/01', src: 'assets/image/line-basic.png' },
         { name: '光滑折线图', link: '/line/demo2/02', src: 'assets/image/line-smooth.png' },
+        { name: '基本区域图', link: '/line/demo2/03', src: 'assets/image/line-area.png' },
         { name: '光滑折线图', link: '/line/demo1', src: 'assets/image/line-demo.png' },
       ]
     },
