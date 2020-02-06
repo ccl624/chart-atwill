@@ -119,14 +119,10 @@ export class SfProgressComponent implements OnInit, AfterViewInit {
       .attr('fill', '#dfe3f0')
       .attr('d', backgroundArc);
 
-    const length = 40;
+    const length = 20;
 
     let linear = d3.scaleLinear().domain([0, length]).range([0, 1])
     const compute = d3.interpolate('#29a3f4', '#1e66dd');
-    // const color0 = compute(linear(0));
-    // const color1 = compute(linear(1));
-    // const color2 = compute(linear(2));
-    // console.log(color0, color1, color2);
 
 
     arcG.selectAll('.precentage-path')
@@ -141,7 +137,7 @@ export class SfProgressComponent implements OnInit, AfterViewInit {
       .attr('fill', (d: any, i: number) => compute(linear(i)))
       .attr('stroke', (d: any, i: number) => compute(linear(i)))
       .attr('stroke-width', 1)
-      .attr('shape-rendering', 'crispEdges')
+      // .attr('shape-rendering', 'crispEdges')
       .transition(this.transition)
       .attrTween('d', (d: any) => (t: number) => this.createArc(r, arcW, t * d.startAngle, t * d.endAngle)())
 
@@ -149,12 +145,23 @@ export class SfProgressComponent implements OnInit, AfterViewInit {
   }
 
   private createLinearColor(color1: string, color2: string, angle: number) {
+    const cos = Math.cos;
+    const sin = Math.sin;
+    const pointStart = [
+      0.5 - 0.5 * cos(angle) * sin(angle),
+      0.5 + 0.5 * cos(angle) * cos(angle)
+    ];
+    // 渐变终点
+    const pointEnd = [
+      0.5 - 0.5 * sin(angle),
+      0.5 + 0.5 * cos(angle)
+    ];
     return {
       type: 'linear',
-      x1: 0,
-      x2: 1,
-      y1: 0,
-      y2: 1,
+      x1: pointStart[0],
+      x2: pointEnd[0],
+      y1: pointStart[1],
+      y2: pointEnd[1],
       colorStops: [
         {
           offset: 0, color: color1, opacity: 1
