@@ -577,7 +577,7 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
   }
 
   private activeBar(node: any, isActive = true) {
-    node.selectAll('.rightSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
+    node.selectAll('.rightSauare').attr('fill', isActive ? 'url(#china_bar_right_active)' : 'url(#china_bar_right)');
     node.selectAll('.frontSauare').attr('fill', isActive ? 'url(#china_bar_front_active)' : 'url(#china_bar_front)');
     node.selectAll('.topSauare').attr('fill', isActive ? '#f0302eb3' : '#aedcffb3');
   }
