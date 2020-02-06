@@ -15,6 +15,8 @@ export class XAxis {
 
   public updateData(xAxisOption: any, margin: any, width: number, height: number) {
     const data = xAxisOption ? xAxisOption.data || [] : [];
+    console.log(data);
+    
     this.scale.domain(data);
     this.resizeAxis(margin, width, height);
   }
