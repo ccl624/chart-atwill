@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SfPieComponent } from './sf-pie.component';
+import { SfSliderComponent } from './sf-slider.component';
 
-describe('SfPieComponent', () => {
-  let component: SfPieComponent;
-  let fixture: ComponentFixture<SfPieComponent>;
+describe('SfSliderComponent', () => {
+  let component: SfSliderComponent;
+  let fixture: ComponentFixture<SfSliderComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SfPieComponent ]
+      declarations: [ SfSliderComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SfPieComponent);
+    fixture = TestBed.createComponent(SfSliderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

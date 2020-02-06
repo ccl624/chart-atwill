@@ -98,6 +98,10 @@ export class PieDemoComponent implements OnInit {
     };
 
     this.option.legend.data = this.option.series[0].data.map(d => d.name).concat(this.option.series[1].data.map(d => d.name));
+
+    setTimeout(() => {
+      this.pieIntance.initPie();
+    }, 200);
   }
 
   public pieSelected(data: any) {

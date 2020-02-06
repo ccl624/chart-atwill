@@ -174,7 +174,7 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
     }
   };
 
-  @Input() public scale = 900;
+  @Input() public scale = 880;
 
   @Input()
   public get data(): any[] {

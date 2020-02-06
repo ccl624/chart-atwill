@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LineDemoComponent } from './line-demo.component';
+import { CardGroupComponent } from './card-group.component';
 
-describe('LineDemoComponent', () => {
-  let component: LineDemoComponent;
-  let fixture: ComponentFixture<LineDemoComponent>;
+describe('CardGroupComponent', () => {
+  let component: CardGroupComponent;
+  let fixture: ComponentFixture<CardGroupComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ LineDemoComponent ]
+      declarations: [ CardGroupComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LineDemoComponent);
+    fixture = TestBed.createComponent(CardGroupComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

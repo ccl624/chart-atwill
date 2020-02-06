@@ -1,0 +1,25 @@
+<!-- <div class="ace-editor-wrap" id="aceEditor{{id}}"></div> -->
+<div class="ace-editor-wrap">
+  <div class="btn-group">
+    <a href="javascript:;" class="beautify-code" (click)="beautifyCode()">格式化代码</a>
+    <a href="javascript:;" class="run-code" (click)="runMyCode()">运行</a>
+  </div>
+  <div class="editor">
+    <ace-editor
+      #aceEditor
+      class="ace-editor-wrap"
+      [(text)]="text"
+      [mode]="'javascript'"
+      [theme]="'tomorrow_night'"
+      [options]="editorOpt"
+      [readOnly]="false"
+      [autoUpdateContent]="true"
+      [durationBeforeCallback]="1000"
+      (textChanged)="onChange($event)"
+    >
+    </ace-editor>
+  </div>
+</div>
+
+
+

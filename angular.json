@@ -29,7 +29,12 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": [],
+            "scripts": [
+              "node_modules/ace-builds/src-min/ace.js",
+              "node_modules/ace-builds/src-min/mode-javascript.js",
+              "node_modules/ace-builds/src-min/theme-tomorrow_night.js",
+              "node_modules/ace-builds/src-min/ext-beautify.js"
+            ],
             "es5BrowserSupport": true
           },
           "configurations": {

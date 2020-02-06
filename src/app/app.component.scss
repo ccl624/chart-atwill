@@ -1,0 +1,53 @@
+.chart-app {
+  height: 100%;
+
+  header {
+    height: 50px;
+    background-color: #293c55;
+
+    .chart-app-logo {
+      float: left;
+
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      font-size: 20px;
+      height: 100%;
+      width: 170px;
+      line-height: 50px;
+      margin-left: 10px;
+
+      a{
+        display: block;
+        color: #ffffff;
+      }
+      i {
+        display: inline-block;
+        font-size: 32px;
+        vertical-align: middle;
+        margin-right: 5px;
+
+        &::before {
+          color: #e43c59;
+        }
+      }
+    }
+
+    .chart-github-link {
+      float: right;
+      height: 100%;
+      width: 50px;
+
+      a {
+        display: block;
+        height: 100%;
+        width: 100%;
+        line-height: 50px;
+        font-size: 28px;
+      }
+
+    }
+  }
+
+  section {
+    height: calc(100% - 50px);
+  }
+}

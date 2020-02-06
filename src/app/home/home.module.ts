@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home.component';
+import { CardGroupComponent } from './card-group/card-group.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent }
@@ -12,7 +13,7 @@ const routes: Routes = [
     CommonModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [HomeComponent]
+  declarations: [HomeComponent, CardGroupComponent]
 })
 
 export class HomeModule { }

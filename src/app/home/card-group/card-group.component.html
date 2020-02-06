@@ -1,0 +1,11 @@
+<div #cardListElement>
+  <h1 class="card-title">{{group?.groupName}} <span>{{group?.groupType}}</span></h1>
+  <ul class="chart-card-list">
+    <li *ngFor="let card of group?.cardList" class="chart-card">
+      <a [ngStyle]="{'height': cardH * 0.8 + 'px', 'width': cardH + 'px'}" [routerLink]="card.link" target="_blank">
+        <h4>{{card?.name}}</h4>
+        <div class="card-img"><img [attr.src]="card.src" alt="图片加载失败"></div>
+      </a>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,30 @@
+$btnH : 30px;
+.ace-editor-wrap{
+  height: 100%;
+  width: 100%;
+  padding-top: $btnH;
+  box-sizing: border-box;
+  .btn-group{
+    height: $btnH;
+    margin-top: -$btnH;
+    background-color: #1d1f21;
+
+    a{
+      float: right;
+      display: block;
+      height: $btnH - 4px;
+      color: #ffffff;
+      background-color: #3399ff;
+      margin-right: 10px;
+      margin-top: 2px;
+      padding: 4px 8px;
+      border-radius: 3px;
+      border: 1px solid #3399ff;
+      font-size: 12px;
+    }
+  }
+
+  .editor{
+    height: 100%;
+  }
+}
