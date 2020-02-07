@@ -33,7 +33,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^8.9.5",
     "codelyzer": "~4.5.0",
-    "d3": "^5.14.2",
+    "d3": "^5.15.0",
     "d3-geo-projection": "^2.7.1",
     "element-resize-detector": "^1.1.16",
     "jasmine-core": "~2.99.1",
