@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SliderDemoComponent implements OnInit {
 
-  private progressArcs = [];
+  public progressArcs = [];
 
   private num = 0;
 
