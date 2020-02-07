@@ -55,7 +55,7 @@ export class BookshelfComponent implements OnInit {
     this.svg = shelfNode.append('svg')
       .attr('class', 'shelf-svg')
       .attr('viewBox', `0 0 ${this.width} ${this.height}`)
-      .attr('preserveAspectRatio', 'xMinyMin meet')
+      .attr('preserveAspectRatio', 'xMinYMin meet')
       .attr('width', '100%')
       .attr('height', '100%');
 
