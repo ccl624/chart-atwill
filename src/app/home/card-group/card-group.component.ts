@@ -8,7 +8,7 @@ import { fromEvent } from 'rxjs';
 })
 export class CardGroupComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('cardListElement') public cardListElement: ElementRef;
+  @ViewChild('cardListElement', { static: true }) public cardListElement: ElementRef;
 
   @Input() public group: any;
 

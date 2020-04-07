@@ -137,7 +137,9 @@ export class Tooltip {
 
     getPosition(chartId, tipBox) {
         const tipBoxParent = d3.select(`#sfChart${chartId}`);
-        const parentPosition = tipBoxParent.node().getBoundingClientRect();
+        const tipBoxNode: any = tipBoxParent.node();
+        const parentPosition = tipBoxNode.getBoundingClientRect();
+        // const parentPosition = tipBoxParent.node().getBoundingClientRect();
         const currentNodeHeight = tipBox.node().getBoundingClientRect().height;
         const clientX = d3.event.clientX;
         const clientY = d3.event.clientY;

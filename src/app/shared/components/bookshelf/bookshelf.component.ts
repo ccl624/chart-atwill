@@ -8,7 +8,7 @@ import * as d3 from 'd3';
 })
 export class BookshelfComponent implements OnInit {
 
-  @ViewChild('bookshelf') bookshelf: ElementRef;
+  @ViewChild('bookshelf', { static: true }) bookshelf: ElementRef;
 
   @Input()
   public get data(): any[] {
@@ -90,7 +90,7 @@ export class BookshelfComponent implements OnInit {
       .attr('stroke-width', 0);
 
     const that = this;
-    this.shelfNodes.each(function(d: any, i: number) {
+    this.shelfNodes.each(function (d: any, i: number) {
       that.updateShelfLevel(d.shelfLevels, this, false);
     });
     this.forbidArea = this.addNoteArea({ fillColor: 'red', note: '区域已满', fontSize: 36 });
@@ -173,7 +173,7 @@ export class BookshelfComponent implements OnInit {
   }
 
   private breakoutToFree(node: any, parentNode: any, d: any) {
-    const p = d3.select(parentNode).datum();
+    const p: any = d3.select(parentNode).datum();
     if (p && !d.isFree) {
       d.tx = p.tx;
       d.ty = d.ty + p.ty;
@@ -225,7 +225,7 @@ export class BookshelfComponent implements OnInit {
   }
 
   private backToNewParent(node: any, parentNode: any, d: any) {
-    const p = d3.select(parentNode).datum();
+    const p: any = d3.select(parentNode).datum();
     if (p && d.isFree) {
       node.attr('class', 'shelf-level-g');
       d.tx = 0;
@@ -242,7 +242,7 @@ export class BookshelfComponent implements OnInit {
   }
 
   private backToOriginParent(node: any, parentNode: any, d: any) {
-    const p = d3.select(parentNode).datum();
+    const p: any = d3.select(parentNode).datum();
     if (p && d.isFree) {
       node.attr('class', 'shelf-level-g');
       d.tx = d.source.tx;

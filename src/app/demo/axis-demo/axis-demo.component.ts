@@ -8,7 +8,7 @@ import * as d3 from 'd3';
 })
 export class AxisDemoComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('axisWrap') axisWrap: ElementRef;
+  @ViewChild('axisWrap', { static: true }) axisWrap: ElementRef;
 
   constructor() { }
 

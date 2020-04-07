@@ -9,7 +9,7 @@ import { fromEvent } from 'rxjs';
 
 export class HomeComponent implements OnInit {
 
-  @ViewChild('chartsContent') public chartsContent: ElementRef;
+  @ViewChild('chartsContent', { static: true }) public chartsContent: ElementRef;
 
   public cardH = 0;
 

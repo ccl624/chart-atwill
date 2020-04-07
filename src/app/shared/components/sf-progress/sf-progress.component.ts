@@ -11,7 +11,7 @@ import { debounceTime } from 'rxjs/operators';
 })
 export class SfProgressComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('sfProgress') public sfProgress: ElementRef;
+  @ViewChild('sfProgress', { static: true }) public sfProgress: ElementRef;
 
   @Input() precent = 90;
 
@@ -112,7 +112,7 @@ export class SfProgressComponent implements OnInit, AfterViewInit {
       .attr('fill', '#d3d2d4')
       .attr('stroke-width', 1)
       .transition(this.transition)
-      .attrTween('d', (d: any) => (t: number) => progressArc.endAngle(2 * Math.PI * this.precent / 100 * t)());
+      .attrTween('d', (d: any) => (t: number) => progressArc.endAngle(2 * Math.PI * this.precent / 100 * t)(d));
     // .attr('d', progressArc);
 
     arcG.append('path')
@@ -121,14 +121,14 @@ export class SfProgressComponent implements OnInit, AfterViewInit {
 
     const length = 20;
 
-    let linear = d3.scaleLinear().domain([0, length]).range([0, 1])
+    let linear = d3.scaleLinear().domain([0, length]).range([0, 1]);
     const compute = d3.interpolate('#29a3f4', '#1e66dd');
 
 
     arcG.selectAll('.precentage-path')
       .data(d3.range(length).map((d: number) => {
         const pre = 2 * Math.PI * this.precent / length / 100;
-        return { startAngle: d * pre, endAngle: (d + 1) * pre }
+        return { startAngle: d * pre, endAngle: (d + 1) * pre };
       }))
       .enter()
       .append('path')
@@ -139,7 +139,7 @@ export class SfProgressComponent implements OnInit, AfterViewInit {
       .attr('stroke-width', 1)
       // .attr('shape-rendering', 'crispEdges')
       .transition(this.transition)
-      .attrTween('d', (d: any) => (t: number) => this.createArc(r, arcW, t * d.startAngle, t * d.endAngle)())
+      .attrTween('d', (d: any) => (t: number) => this.createArc(r, arcW, t * d.startAngle, t * d.endAngle)(d))
 
     this.drawTitle(arcG);
   }

@@ -8,7 +8,7 @@ const ace = require('ace-builds/src-min-noconflict/ace');
 })
 export class AceEditorComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('aceEditor') public aceEditor: any;
+  @ViewChild('aceEditor', { static: true }) public aceEditor: any;
 
   public id = '001';
 

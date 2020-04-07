@@ -11,7 +11,7 @@ import { debounceTime } from 'rxjs/operators';
 })
 export class SfSliderComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('sliderWrap') public sliderWrap: ElementRef;
+  @ViewChild('sliderWrap', { static: true }) public sliderWrap: ElementRef;
 
   private width = 0;
 
@@ -135,7 +135,7 @@ export class SfSliderComponent implements OnInit, AfterViewInit {
       .attr('d', `
         M${radius},0
         A${radius},${radius} 0 0,0 ${radius},${radius * 2}
-        L${mainBarW - radius},${radius * 2} 
+        L${mainBarW - radius},${radius * 2}
         A${radius},${radius} 0 0,0 ${mainBarW - radius},0
         Z
       `);
@@ -161,7 +161,7 @@ export class SfSliderComponent implements OnInit, AfterViewInit {
       .attr('d', `
         M${radius},0
         A${radius},${radius} 0 0,0 ${radius},${radius * 2}
-        L${mainBarW - radius},${radius * 2} 
+        L${mainBarW - radius},${radius * 2}
         A${radius},${radius} 0 0,0 ${mainBarW - radius},0
         Z
       `)

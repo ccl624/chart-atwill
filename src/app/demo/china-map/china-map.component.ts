@@ -253,7 +253,7 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private initProjection(center: any[] = [0, 0]) {
+  private initProjection(center: [number, number] = [0, 0]) {
     return d3.geoMercator()
       .center(center)
       .scale(this.scale)
@@ -561,7 +561,7 @@ export class ChinaMapComponent implements OnInit, AfterViewInit {
 
     markerG.selectAll('.marker-text-num')
       .transition(this.transition)
-      .textTween((d: any) => (t: number) =>  t * d.value ? '访问量：' + (t * d.value).toFixed(2) : '');
+      .textTween((d: any) => (t: number) => t * d.value ? '访问量：' + (t * d.value).toFixed(2) : '');
     // markerG.selectAll('.arrow-icon').attr('fill', (d: any) => d.value ? '#aedcff' : 'none');
     markerG.selectAll('.marker-frame').attr('stroke-width', (d: any) => d.value ? 2 : 0);
     markerG.transition(this.transition)

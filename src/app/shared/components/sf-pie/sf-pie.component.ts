@@ -9,9 +9,9 @@ import { map, debounceTime, throttle } from 'rxjs/operators';
   styleUrls: ['./sf-pie.component.scss']
 })
 export class SfPieComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('sfPieWrap') public sfPieWrap: ElementRef;
+  @ViewChild('sfPieWrap', { static: true }) public sfPieWrap: ElementRef;
 
-  @ViewChild('sfPieTootip') public sfPieTootip: ElementRef;
+  @ViewChild('sfPieTootip', { static: true }) public sfPieTootip: ElementRef;
 
   @Input() public option: SfPieOption;
 

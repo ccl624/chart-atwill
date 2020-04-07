@@ -14,7 +14,7 @@ import * as ERD from 'element-resize-detector';
 })
 export class SfChartComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @ViewChild('chartWrap') chartWrap: ElementRef;
+  @ViewChild('chartWrap', { static: true }) chartWrap: ElementRef;
 
   @Input()
   public get option(): any {
