@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --disable-host-check true --open --host 192.168.1.128 --port 4100",
+    "start": "ng serve --disable-host-check true --open --port 4100",
     "build": "node --max_old_space_size=5048 ./node_modules/@angular/cli/bin/ng build --prod",
     "ngbuild": "ng build --prod --source-map --progress",
     "buildLine": "ng build --prod --progress",

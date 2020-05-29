@@ -1,6 +1,7 @@
 import * as SHAP from 'd3-shape';
 import * as EASE from 'd3-ease';
 import * as TS from 'd3-transition';
+import * as Interpolate from 'd3-interpolate';
 
 export class Line {
 
@@ -39,14 +40,6 @@ export class Line {
     this.minMax = minMax;
   }
 
-  private updateClipAreaParams() {
-    const x0 = this.scaleX(this.data[0].label);
-    const x1 = this.scaleX(this.data[this.data.length - 1].label);
-    const y0 = this.scaleY(this.minMax.min);
-    const y1 = this.scaleY(this.minMax.max);
-    return { w: x1 - x0, h: y0 - y1, x0, x1, y0, y1 };
-  }
-
   private defindLine() {
     const line = SHAP.line().x((d: any) => this.scaleX(d.label)).y((d: any) => this.scaleY(d.value));
     if (this.serie.smooth) {
@@ -68,40 +61,12 @@ export class Line {
     return area;
   }
 
-  private updateClipArea() {
-    const cp = this.updateClipAreaParams();
-    const clipPathUpdate = this.chartNode.selectAll('.clip-defs').data([this.changeIndex]);
-    clipPathUpdate.selectAll('#area-clip rect')
-      .transition(this.resizeTs)
-      .attr('x', cp.x0)
-      .attr('y', cp.y1)
-      .attr('height', cp.h)
-      .attr('width', cp.w);
-    const clipPathEnter = clipPathUpdate.enter();
-    const clipPathExit = clipPathUpdate.exit();
-
-    const clipPath = clipPathEnter.append('defs')
-      .attr('class', 'clip-defs')
-      .append('clipPath')
-      .attr('stroke', 'blue')
-      .attr('id', 'area-clip');
-
-    clipPath.append('rect')
-      .attr('x', cp.x0)
-      .attr('y', cp.y1)
-      .attr('height', cp.h)
-      .transition(this.initTs)
-      .attr('width', cp.w);
-    clipPathExit.remove();
-  }
-
   private updateArea() {
     if (this.serie.areaStyle) {
       const areaUpdate = this.chartNode.selectAll('.area-g')
         .data([this.changeIndex]);
 
       areaUpdate.selectAll('.area').datum(this.data)
-        .transition(this.resizeTs)
         .attr('d', this.area);
 
       const areaEnter = areaUpdate.enter();
@@ -113,7 +78,6 @@ export class Line {
         .datum(this.data)
         .attr('fill', '#c23531')
         .attr('fill-opacity', '0.6')
-        .attr('clip-path', 'url(#area-clip)')
         .attr('d', this.area);
 
       areaExit.remove();
@@ -124,7 +88,6 @@ export class Line {
     const lineUpdate = this.chartNode.selectAll('.line-g')
       .data([this.changeIndex]);
     lineUpdate.selectAll('.line').datum(this.data)
-      .transition(this.resizeTs)
       .attr('d', this.line);
     const lineEnter = lineUpdate.enter();
     const lineExit = lineUpdate.exit();
@@ -136,16 +99,18 @@ export class Line {
       .attr('fill', 'none')
       .attr('stroke', '#c23531')
       .attr('stroke-width', 1.5)
-      .attr('clip-path', 'url(#area-clip)')
-      .attr('d', this.line);
-
+      .attr('d', this.line)
+      .transition(this.initTs)
+      .attrTween('stroke-dasharray', function() {
+        const length = this.getTotalLength();
+        return Interpolate.interpolate(`0,${length}`, `${length},${length}`);
+      })
     lineExit.remove();
   }
 
   private drawSymbol() {
     const symbolUpdate = this.chartNode.selectAll('.symbol-g').data(this.data);
     symbolUpdate.selectAll('circle')
-      .transition(this.resizeTs)
       .attr('cx', (d: any) => this.scaleX(d.label))
       .attr('cy', (d: any) => this.scaleY(d.value));
     const sumbolEnter = symbolUpdate.enter();
@@ -159,14 +124,15 @@ export class Line {
       .attr('cx', (d: any) => this.scaleX(d.label))
       .attr('cy', (d: any) => this.scaleY(d.value))
       .attr('r', 0)
-      .transition(this.initTs)
+      .transition()
+      .duration(2000)
+      .ease(EASE.easeLinear)
       .attr('r', 3);
     symbolUpdate.exit().remove();
   }
 
   private drawChart() {
     this.chartNode.transition(this.resizeTs).attr('transform', `translate(${this.scaleX.step() / 2},0)`);
-    this.updateClipArea();
     this.updateArea();
     this.updatePath();
     this.drawSymbol();
